@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe - Mentes Brillantes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #222;
+            background: linear-gradient(180deg, #ffb300 0 180px, #fffbe7 180px 100%);
+        }
+        .container {
+            max-width: 1100px;
+            margin: 48px auto 32px auto;
+            background: rgba(255,255,255,0.99);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(255,179,0,0.18);
+            padding: 44px 32px 32px 32px;
+            position: relative;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 2.8em;
+            margin: 0 0 8px 0;
+            letter-spacing: 2.5px;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-weight: 900;
+            color: #111;
+            background: none;
+            text-shadow: 0 2px 8px #ffd54f44;
+            position: relative;
+        }
+        .header h1::after {
+            content: "";
+            display: block;
+            margin: 12px auto 0 auto;
+            width: 60%;
+            height: 4px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #ffd700 0%, #ffb300 50%, #ffd700 100%);
+            box-shadow: 0 2px 12px #ffd70099;
+            opacity: 1;
+        }
+        .banner {
+            background: linear-gradient(90deg, #ffb300 60%, #ffd54f 100%);
+            color: #222;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 10px;
+            padding: 14px 0 12px 0;
+            margin-bottom: 28px;
+            font-size: 1.25em;
+            letter-spacing: 1.2px;
+            box-shadow: 0 2px 8px rgba(255,179,0,0.13);
+            text-shadow: 1px 1px 0 #fffbe7, 0 2px 8px #0002;
+        }
+        .btn-volver {
+            background: #ffd54f;
+            color: #a67c00;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 12px #ffd54f55;
+            position: absolute;
+            top: 32px;
+            right: 48px;
+            transition: background 0.2s, color 0.2s;
+        }
+        .btn-volver:hover {
+            background: #ffb300;
+            color: #fff;
+        }
+        h2 {
+            color: #1976d2;
+            margin-top: 38px;
+            margin-bottom: 12px;
+            font-size: 1.45em;
+            letter-spacing: 1px;
+        }
+        .resumen {
+            background: #fffbe7;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 24px;
+            color: #a67c00;
+            font-size: 1.13em;
+            box-shadow: 0 2px 8px #ffd54f33;
+        }
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .overview-card {
+            background: #fffbe7;
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 4px 12px rgba(255, 179, 0, 0.18);
+            border: 1px solid #ffe082;
+        }
+        .overview-card span {
+            font-size: 0.95em;
+            color: #a67c00;
+            letter-spacing: 0.5px;
+        }
+        .overview-card strong {
+            display: block;
+            margin-top: 6px;
+            font-size: 1.9em;
+            color: #1b3a57;
+        }
+        .overview-card small {
+            display: block;
+            margin-top: 4px;
+            color: #6c5b13;
+            font-size: 0.9em;
+        }
+        .progress-summary {
+            background: #fffbe7;
+            border-radius: 12px;
+            padding: 18px 20px 22px 20px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 12px rgba(255, 179, 0, 0.16);
+            border: 1px solid #ffe082;
+        }
+        .progress-summary__label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #1b3a57;
+            margin-bottom: 12px;
+        }
+        .progress-summary__label span {
+            color: #6c5b13;
+            font-size: 1em;
+            letter-spacing: 0.8px;
+        }
+        .progress-summary__label strong {
+            font-size: 1.8em;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 14px;
+            border-radius: 999px;
+            background: #ffeeba;
+            overflow: hidden;
+        }
+        .progress-bar__fill {
+            height: 100%;
+            width: 0;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #ffd54f, #ffb300);
+            transition: width 0.4s ease;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0 32px 0;
+            background: #fffbe7;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px #ffd54f22;
+        }
+        .tabla-scroll-limited {
+            max-height: 420px;
+            overflow-y: auto;
+            border-radius: 10px;
+            border: 1px solid #ffe082;
+            box-shadow: inset 0 0 8px rgba(255, 179, 0, 0.15);
+        }
+        .tabla-filtros {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        .tabla-filtros select,
+        .tabla-filtros input {
+            border-radius: 8px;
+            border: 1px solid #ffd54f;
+            padding: 6px 10px;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 0.95em;
+            background: #fffdf3;
+        }
+        .tabla-filtros button {
+            border: none;
+            border-radius: 8px;
+            padding: 6px 16px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(90deg,#ffb300,#ffd54f);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(255,179,0,0.25);
+        }
+        .tabla-resumen {
+            font-weight: 700;
+            background: #ffecb3 !important;
+        }
+        th, td {
+            border: 1px solid #ffd54f;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 1em;
+        }
+        th {
+            background: #ffecb3;
+            font-weight: bold;
+            color: #a67c00;
+        }
+        tr:nth-child(even) td {
+            background: #fff8e1;
+        }
+        .chart-container {
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto 32px auto;
+            background: #fffbe7;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #ffd54f22;
+            padding: 18px 10px 10px 10px;
+        }
+        .chart-title {
+            text-align: center;
+            color: #1976d2;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .chart-note {
+            font-size: 0.9em;
+            color: #6c5b13;
+            margin: 10px 0 0 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Informe de Encuestas</h1>
+        </div>
+        <div class="banner">Panel de resultados y análisis</div>
+        <button class="btn-volver" onclick="window.location.href='MentesBrillantes.html'">Volver al Panel</button>
+        <div class="resumen" style="background:#fffbe7; border-radius:10px; padding:18px; margin-bottom:24px; color:#a67c00; font-size:1.1em;">
+            <b>Este informe muestra:</b><br>
+            1. Número de ideas segregado por proceso y tipo de idea.<br>
+            2. Avance de cada una y avance general.<br>
+            3. Status de lo Cerrado / Pendiente / En consulta de viabilidad / En desarrollo / Viable / No viable / Proyecto de Lean.
+        </div>
+        <div class="overview-grid" id="resumenIndicadores"></div>
+        <div class="progress-summary" id="avanceGeneralContainer">
+            <div class="progress-summary__label">
+                <span>Avance general del portafolio</span>
+                <strong id="avanceGeneralNumero">0%</strong>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-bar__fill" id="avanceGeneralBar"></div>
+            </div>
+        </div>
+        <h2>1. Ideas por Proceso y Tipo de Idea</h2>
+        <div id="tablaIdeas"></div>
+        
+        <h2>2. Avance de Ideas</h2>
+        <div class="tabla-filtros">
+            <input type="text" id="filtroAvanceTexto" placeholder="Buscar por idea o proceso...">
+            <select id="filtroAvanceProceso">
+                <option value="">Todos los procesos</option>
+            </select>
+            <select id="filtroAvanceRango">
+                <option value="">Todos los avances</option>
+                <option value="0-25">0% - 25%</option>
+                <option value="26-50">26% - 50%</option>
+                <option value="51-75">51% - 75%</option>
+                <option value="76-100">76% - 100%</option>
+            </select>
+            <button onclick="resetFiltrosAvance()">Limpiar filtros</button>
+        </div>
+        <div class="tabla-scroll-limited" id="tablaAvance"></div>
+        <h2>3. Status de las Ideas</h2>
+        <div id="tablaStatus"></div>
+        <div class="chart-container">
+            <div class="chart-title">Distribución de estatus</div>
+            <canvas id="chartStatus"></canvas>
+        </div>
+    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script>
+        // Configuración Firebase igual que en MentesBrillantes.html
+        var firebaseConfig = {
+          apiKey: "AIzaSyCSJvvvyiY9-419R1gETR6lopy2P1vQbkY",
+          authDomain: "despertando-ideas.firebaseapp.com",
+          databaseURL: "https://despertando-ideas-default-rtdb.firebaseio.com",
+          projectId: "despertando-ideas",
+          storageBucket: "despertando-ideas.firebasestorage.app",
+          messagingSenderId: "677954954360",
+          appId: "1:677954954360:web:9cc25ac38c1362282ff98d",
+          measurementId: "G-ZCFT4Z84TE"
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.database();
+
+        // Opciones fijas
+        const tiposIdea = ['Mejora de proceso','Clima laboral','Ahorro de costos','Seguridad y SST','Calidad','Innovación','Sin clasificar'];
+        const procesos = ['Maquillajes','Emulsiones','Hidroalcoholes','Almacén','Cendis','Mantenimiento','Calidad','LEAN','TTCA'];
+        const statusList = ['Cerrado','Pendiente','En consulta de viabilidad','En desarrollo','Viable','No viable','Proyecto de Lean'];
+        const statusEquivalencias = {
+            'CERRADO': 'Cerrado',
+            'PENDIENTE': 'Pendiente',
+            'EN CONSULTA DE VIABILIDAD': 'En consulta de viabilidad',
+            'EN DESARROLLO': 'En desarrollo',
+            'VIABLE': 'Viable',
+            'NO VIABLE': 'No viable',
+            'PROYECTO DE LEAN': 'Proyecto de Lean'
+        };
+        const areaEquivalencias = {
+            'MAQUILLAJES': 'Maquillajes',
+            'EMULSIONES': 'Emulsiones',
+            'HIDROALCOHOLES': 'Hidroalcoholes',
+            'HIDROALCOHOLE': 'Hidroalcoholes',
+            'HIDROALCOHOL': 'Hidroalcoholes',
+            'ALMACEN': 'Almacén',
+            'ALMACENES': 'Almacén',
+            'CENDIS': 'Cendis',
+            'MANTENIMIENTO': 'Mantenimiento',
+            'CALIDAD': 'Calidad',
+            'LEAN': 'LEAN',
+            'TTCA': 'TTCA'
+        };
+        const tipoIdeaEquivalencias = {
+            'MEJORA DE PROCESO': 'Mejora de proceso',
+            'CLIMA LABORAL': 'Clima laboral',
+            'AHORRO DE COSTOS': 'Ahorro de costos',
+            'SEGURIDAD Y SST': 'Seguridad y SST',
+            'SEGURIDAD Y SST.': 'Seguridad y SST',
+            'CALIDAD': 'Calidad',
+            'INNOVACION': 'Innovación',
+            'INNOVACIÓN': 'Innovación'
+        };
+        const tipoMejoraEquivalencias = {
+            'PROCESO': 'Mejora de proceso',
+            'PROCESOS': 'Mejora de proceso',
+            'PROCESO.': 'Mejora de proceso',
+            'PROCESO/': 'Mejora de proceso',
+            'PROCESO Y CALIDAD': 'Mejora de proceso',
+            'MEDIO AMBIENTE': 'Clima laboral',
+            'MEDIO AMBT': 'Clima laboral',
+            'MEDIO AMBIENTE.': 'Clima laboral',
+            'BIENESTAR/ SALUD Y SEGURIDAD EN EL TRABAJO': 'Clima laboral',
+            'PRODUCTO': 'Calidad',
+            'CALIDAD': 'Calidad',
+            'MAQUINARIA': 'Innovación',
+            'MANTENIMIENTO Y/O EQUIPOS': 'Innovación',
+            'MAQUINARIA Y/O EQUIPOS': 'Innovación',
+            'EQUIPOS': 'Innovación',
+            'SALUD Y SEGURIDAD': 'Seguridad y SST',
+            'SALUD Y SEGURIDAD EN EL TRABAJO': 'Seguridad y SST',
+            'SALUD Y SEGURIDAD EN EL TRABAJO.': 'Seguridad y SST',
+            'SALUD Y SEGURIDAD EN EL TRABAJO/': 'Seguridad y SST',
+            'SALUD Y SEGURIDAD EN EL TRABAJO. BIENESTAR': 'Seguridad y SST'
+        };
+
+        function escapeHtml(valor) {
+            if (valor === null || valor === undefined) return '';
+            return String(valor)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function truncarTexto(texto, limite = 40) {
+            const base = (texto || 'Idea sin nombre').trim();
+            return base.length > limite ? base.slice(0, limite - 1) + '…' : base;
+        }
+
+        function normalizarBase(valor) {
+            if (!valor) return '';
+            return valor
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toUpperCase()
+                .trim();
+        }
+
+        function normalizarArea(valor) {
+            const llave = normalizarBase(valor);
+            return areaEquivalencias[llave] || (valor ? valor.trim() : '');
+        }
+
+        function normalizarTipoIdea(valor) {
+            const llave = normalizarBase(valor);
+            return tipoIdeaEquivalencias[llave] || '';
+        }
+
+        function normalizarStatus(valor) {
+            const llave = normalizarBase(valor);
+            return statusEquivalencias[llave] || (valor ? valor.trim() : '');
+        }
+
+        function obtenerTiposDesdeMejora(cadena) {
+            if (!cadena) return [];
+            return cadena
+                .split(/[;,]/)
+                .map(item => tipoMejoraEquivalencias[normalizarBase(item)] || '')
+                .filter(Boolean);
+        }
+
+        function obtenerTiposIdea(cadena, fallbackMejora) {
+            let lista = [];
+            if (cadena) {
+                lista = cadena
+                    .split(/[;,]/)
+                    .map(item => normalizarTipoIdea(item))
+                    .filter(Boolean);
+            }
+            if (!lista.length && fallbackMejora) {
+                lista = obtenerTiposDesdeMejora(fallbackMejora);
+            }
+            if (!lista.length) {
+                lista = ['Sin clasificar'];
+            }
+            return lista;
+        }
+
+        function mapearEncuestasDesdeFirebase(rawData) {
+            if (!rawData) return [];
+            return Object.keys(rawData).map(key => {
+                const item = rawData[key] || {};
+                const tiposNormalizados = obtenerTiposIdea(item.tipo_idea, item.tipo_mejora);
+                return {
+                    ...item,
+                    area: normalizarArea(item.area),
+                    tipoIdeaLista: tiposNormalizados
+                };
+            }).sort((a,b) => {
+                const regA = parseInt(a.registro) || 0;
+                const regB = parseInt(b.registro) || 0;
+                return regB - regA;
+            });
+        }
+
+        function obtenerPromedioAvance(encuestas) {
+            if (!encuestas.length) return 0;
+            const total = encuestas.reduce((acc, enc) => acc + (parseInt(enc.porcentaje_avance) || 0), 0);
+            return Math.round(total / encuestas.length);
+        }
+
+        function renderResumen(encuestas) {
+            const totalIdeas = encuestas.length;
+            const promedio = obtenerPromedioAvance(encuestas);
+            let cerradas = 0, pendientes = 0, enDesarrollo = 0, viables = 0;
+            encuestas.forEach(enc => {
+                const status = normalizarStatus(enc.estatus);
+                if (status === 'Cerrado') cerradas++;
+                if (status === 'Pendiente') pendientes++;
+                if (status === 'En desarrollo') enDesarrollo++;
+                if (status === 'Viable') viables++;
+            });
+            const container = document.getElementById('resumenIndicadores');
+            if (container) {
+                container.innerHTML = `
+                    <div class="overview-card">
+                        <span>Total de ideas</span>
+                        <strong>${totalIdeas}</strong>
+                        <small>Encuestas capturadas</small>
+                    </div>
+                    <div class="overview-card">
+                        <span>Ideas cerradas</span>
+                        <strong>${cerradas}</strong>
+                        <small>Marcadas como cerradas</small>
+                    </div>
+                    <div class="overview-card">
+                        <span>Ideas en desarrollo</span>
+                        <strong>${enDesarrollo}</strong>
+                        <small>En ejecución activa</small>
+                    </div>
+                    <div class="overview-card">
+                        <span>Ideas pendientes</span>
+                        <strong>${pendientes}</strong>
+                        <small>En espera de revisión</small>
+                    </div>
+                    <div class="overview-card">
+                        <span>Ideas viables</span>
+                        <strong>${viables}</strong>
+                        <small>Evaluadas como viables</small>
+                    </div>`;
+            }
+            const avanceNumero = document.getElementById('avanceGeneralNumero');
+            const avanceBar = document.getElementById('avanceGeneralBar');
+            if (avanceNumero) avanceNumero.textContent = `${promedio}%`;
+            if (avanceBar) avanceBar.style.width = `${Math.min(Math.max(promedio, 0), 100)}%`;
+
+            const procesosSelect = document.getElementById('filtroAvanceProceso');
+            if (procesosSelect) {
+                const procesosUnicos = Array.from(new Set(encuestas.map(e => e.area).filter(Boolean))).sort();
+                procesosSelect.innerHTML = '<option value="">Todos los procesos</option>' + procesosUnicos.map(proc => `<option value="${escapeHtml(proc)}">${escapeHtml(proc)}</option>`).join('');
+            }
+        }
+
+        // Leer encuestas y procesar
+        db.ref('encuestas').once('value', function(snapshot) {
+            const datos = snapshot.val() || {};
+            const encuestas = mapearEncuestasDesdeFirebase(datos);
+            window.encuestasCache = encuestas;
+                renderResumen(encuestas);
+            inicializarFiltrosAvance(encuestas);
+            renderIdeas(encuestas);
+            renderAvance(encuestas);
+            renderStatus(encuestas);
+        });
+
+        // 1. Ideas por Proceso y Tipo de Idea
+        function renderIdeas(encuestas) {
+            const procesosRender = (() => {
+                const orden = [...procesos];
+                const setProcesos = new Set(orden);
+                encuestas.forEach(enc => {
+                    const proc = enc.area || '';
+                    if (proc && !setProcesos.has(proc)) {
+                        setProcesos.add(proc);
+                        orden.push(proc);
+                    }
+                });
+                return orden;
+            })();
+            const conteo = {};
+            procesosRender.forEach(proc => {
+                conteo[proc] = {};
+                tiposIdea.forEach(tipo => {
+                    conteo[proc][tipo] = 0;
+                });
+            });
+            encuestas.forEach(e => {
+                const proc = e.area || '';
+                if (!proc) return;
+                if (!conteo[proc]) {
+                    conteo[proc] = {};
+                    tiposIdea.forEach(tipo => conteo[proc][tipo] = 0);
+                }
+                const tipos = (Array.isArray(e.tipoIdeaLista) && e.tipoIdeaLista.length)
+                    ? e.tipoIdeaLista
+                    : obtenerTiposIdea(e.tipo_idea, e.tipo_mejora);
+                tipos.forEach(tipo => {
+                    if (conteo[proc][tipo] === undefined) {
+                        conteo[proc][tipo] = 0;
+                    }
+                    conteo[proc][tipo]++;
+                });
+            });
+            // Render tabla
+            let html = '<table><thead><tr><th>Proceso</th>' + tiposIdea.map(t=>`<th>${escapeHtml(t)}</th>`).join('') + '</tr></thead><tbody>';
+            const totalPorProceso = proc => tiposIdea.reduce((acc, tipo) => acc + (conteo[proc]?.[tipo] || 0), 0);
+            const procesosOrdenados = procesosRender.slice().sort((a, b) => totalPorProceso(b) - totalPorProceso(a));
+            procesosOrdenados.forEach(proc => {
+                html += `<tr><td>${escapeHtml(proc)}</td>` + tiposIdea.map(tipo => `<td>${conteo[proc][tipo] || 0}</td>`).join('') + '</tr>';
+            });
+            html += '</tbody></table>';
+            document.getElementById('tablaIdeas').innerHTML = html;
+            // Gráfico eliminado; la tabla mantiene el orden por volumen.
+        }
+
+        // 2. Avance de cada una y general
+        let filtrosAvance = {
+            texto: '',
+            proceso: '',
+            rango: ''
+        };
+
+        function obtenerAvanceFiltrado(encuestas) {
+            return encuestas.filter(e => {
+                const texto = (filtrosAvance.texto || '').toLowerCase();
+                const proceso = filtrosAvance.proceso;
+                const rango = filtrosAvance.rango;
+                const avance = parseInt(e.porcentaje_avance) || 0;
+                const coincideTexto = !texto || (e.propuesta || '').toLowerCase().includes(texto) || (e.area || '').toLowerCase().includes(texto);
+                const coincideProceso = !proceso || e.area === proceso;
+                let coincideRango = true;
+                if (rango) {
+                    const [min, max] = rango.split('-').map(Number);
+                    coincideRango = avance >= min && avance <= max;
+                }
+                return coincideTexto && coincideProceso && coincideRango;
+            });
+        }
+
+        function inicializarFiltrosAvance(encuestas) {
+            const textoInput = document.getElementById('filtroAvanceTexto');
+            const procesoSelect = document.getElementById('filtroAvanceProceso');
+            const rangoSelect = document.getElementById('filtroAvanceRango');
+            if (textoInput) {
+                textoInput.addEventListener('input', e => {
+                    filtrosAvance.texto = e.target.value;
+                    renderAvance(encuestas);
+                });
+            }
+            if (procesoSelect) {
+                procesoSelect.addEventListener('change', e => {
+                    filtrosAvance.proceso = e.target.value;
+                    renderAvance(encuestas);
+                });
+            }
+            if (rangoSelect) {
+                rangoSelect.addEventListener('change', e => {
+                    filtrosAvance.rango = e.target.value;
+                    renderAvance(encuestas);
+                });
+            }
+        }
+
+        window.resetFiltrosAvance = function resetFiltrosAvance() {
+            filtrosAvance = { texto: '', proceso: '', rango: '' };
+            const textoInput = document.getElementById('filtroAvanceTexto');
+            const procesoSelect = document.getElementById('filtroAvanceProceso');
+            const rangoSelect = document.getElementById('filtroAvanceRango');
+            if (textoInput) textoInput.value = '';
+            if (procesoSelect) procesoSelect.value = '';
+            if (rangoSelect) rangoSelect.value = '';
+            if (window.encuestasCache) {
+                renderAvance(window.encuestasCache);
+            }
+        };
+
+        function renderAvance(encuestas) {
+            const filtradas = obtenerAvanceFiltrado(encuestas);
+            let html = '<table><thead><tr><th>Idea</th><th>Proceso</th><th>Tipo</th><th>Avance (%)</th></tr></thead><tbody>';
+            filtradas.forEach(e => {
+                const avance = parseInt(e.porcentaje_avance) || 0;
+                html += `<tr>
+                    <td>${escapeHtml(e.propuesta || '-')}</td>
+                    <td>${escapeHtml(e.area || '-')}</td>
+                    <td>${escapeHtml(e.tipo_idea || '-')}</td>
+                    <td>${avance}%</td>
+                </tr>`;
+            });
+            const promedio = obtenerPromedioAvance(encuestas);
+            html += `</tbody><tfoot><tr class="tabla-resumen"><td colspan="3">Promedio general</td><td>${promedio}%</td></tr></tfoot></table>`;
+            document.getElementById('tablaAvance').innerHTML = html;
+        }
+
+        // 3. Status de las ideas
+        function renderStatus(encuestas) {
+            let conteo = {};
+            statusList.forEach(s=>conteo[s]=0);
+            encuestas.forEach(e => {
+                const status = normalizarStatus(e.estatus);
+                if (status && conteo[status] !== undefined) {
+                    conteo[status]++;
+                } else if (status) {
+                    conteo.Otros = (conteo.Otros || 0) + 1;
+                }
+            });
+            const columnas = [...statusList];
+            if (conteo.Otros) columnas.push('Otros');
+            // Tabla
+            let html = '<table><thead><tr>' + columnas.map(s=>`<th>${escapeHtml(s)}</th>`).join('') + '</tr></thead><tbody><tr>' + columnas.map(s=>`<td>${conteo[s]||0}</td>`).join('') + '</tr></tbody></table>';
+            document.getElementById('tablaStatus').innerHTML = html;
+            // Gráfico de pastel
+            if (window.chartStatusInstance) {
+                window.chartStatusInstance.destroy();
+            }
+            window.chartStatusInstance = new Chart(document.getElementById('chartStatus'), {
+                type: 'pie',
+                data: {
+                    labels: columnas,
+                    datasets: [{
+                        data: columnas.map(s=>conteo[s]||0),
+                        backgroundColor: columnas.map((s,i)=>`hsl(${i*50},80%,70%)`)
+                    }]
+                },
+                options: {
+                    responsive:true,
+                    plugins:{
+                        legend:{position:'right', labels:{font:{size:15}}},
+                        title:{display:true, text:'Distribución de estatus de ideas', font:{size:18}},
+                        tooltip:{
+                            callbacks:{
+                                label: function(ctx){
+                                    let total = ctx.dataset.data.reduce((a,b)=>a+b,0);
+                                    let val = ctx.parsed;
+                                    let pct = total ? ((val/total)*100).toFixed(1) : 0;
+                                    return ctx.label+': '+val+' ideas ('+pct+'%)';
+                                }
+                            }
+                        },
+                        datalabels: {
+                            display:true,
+                            color:'#222',
+                            font:{weight:'bold'},
+                            formatter: (v,ctx)=>{
+                                let total = ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+                                let pct = total ? ((v/total)*100).toFixed(1) : 0;
+                                return v>0 ? v+' ('+pct+'%)' : '';
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+        }
+    </script>
+</body>
+</html>

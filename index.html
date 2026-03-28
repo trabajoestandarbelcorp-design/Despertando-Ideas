@@ -1,0 +1,2495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentes Brillantes - Propuestas de Mejora</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;400&display=swap" rel="stylesheet">
+    <style>
+                        /* Botón menú hamburguesa */
+                        .menu-btn {
+                            position: fixed;
+                            top: 14px;
+                            left: 14px;
+                            width: 42px;
+                            height: 42px;
+                            z-index: 400;
+                            background: #050301;
+                            border: 1.5px solid rgba(255, 196, 0, 0.5);
+                            border-radius: 16px;
+                            cursor: pointer;
+                            padding: 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            box-shadow: 0 8px 20px rgba(0,0,0,0.45), 0 0 14px rgba(255,179,0,0.35);
+                            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+                            touch-action: manipulation;
+                            opacity: 0.97;
+                        }
+                        .menu-btn::before {
+                            content: '';
+                            position: absolute;
+                            inset: 2px;
+                            border-radius: 14px;
+                            background: radial-gradient(circle at 30% 20%, rgba(255,230,120,0.35), transparent 60%);
+                            pointer-events: none;
+                            filter: blur(0.5px);
+                        }
+                        .menu-btn__icon {
+                            width: 26px;
+                            height: 26px;
+                            position: relative;
+                            z-index: 1;
+                        }
+                        .menu-btn__line {
+                            fill: url(#menuLineGradient);
+                            filter: drop-shadow(0 0 6px rgba(255, 193, 7, 0.55));
+                        }
+                        .menu-btn__line--short {
+                            opacity: 0.9;
+                        }
+                        .menu-btn__line--center {
+                            fill: #ffdf6a;
+                        }
+                        .menu-btn.menu-btn--hidden {
+                            opacity: 0;
+                            transform: translateX(-18px) scale(0.8);
+                            pointer-events: none;
+                        }
+                        .menu-btn:hover,
+                        .menu-btn:focus-visible {
+                            transform: translateY(-2px) scale(1.04);
+                            box-shadow: 0 10px 24px rgba(0,0,0,0.55), 0 0 18px rgba(255,179,0,0.65);
+                            outline: none;
+                        }
+                /* Botón flotante compartir */
+                .share-btn {
+                    position: fixed;
+                    top: 24px;
+                    right: 32px;
+                    z-index: 100;
+                    background: #ffb300;
+                    color: #fff;
+                    border: none;
+                    border-radius: 28px;
+                    padding: 4px 10px;
+                    font-size: 1.1em;
+                    font-weight: bold;
+                    box-shadow: 0 2px 12px #ffd54f55;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: background 0.2s, transform 0.2s;
+                }
+                .share-btn:hover {
+                    background: #ffd54f;
+                    color: #a67c00;
+                    transform: scale(1.07);
+                }
+                .share-modal {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(0,0,0,0.45);
+                    z-index: 200;
+                    justify-content: center;
+                    align-items: center;
+                }
+                .share-modal.active {
+                    display: flex;
+                }
+                .share-content {
+                    background: #fffbe7;
+                    border-radius: 18px;
+                    padding: 32px 28px 24px 28px;
+                    box-shadow: 0 8px 32px #ffd54f55;
+                    text-align: center;
+                    min-width: 320px;
+                    max-width: 90vw;
+                }
+                .share-content h2 {
+                    color: #ffb300;
+                    margin-bottom: 18px;
+                }
+                .qr-img-modal {
+                    width: 140px;
+                    margin-bottom: 12px;
+                    border-radius: 12px;
+                    box-shadow: 0 2px 12px #ffd54f55;
+                }
+                .share-link {
+                    margin-top: 10px;
+                    padding: 8px 12px;
+                    background: #fff;
+                    border-radius: 8px;
+                    font-size: 1em;
+                    color: #a67c00;
+                    border: 1px solid #ffe082;
+                    word-break: break-all;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    justify-content: center;
+                }
+                /* Modal contraseña panel */
+                .password-modal {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(0,0,0,0.6);
+                    z-index: 300;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 20px;
+                }
+                .password-modal.active {
+                    display: flex;
+                }
+                .modal-overlay {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    background: rgba(6, 6, 6, 0.35);
+                    backdrop-filter: blur(2px);
+                    z-index: 2147483646;
+                    opacity: 0;
+                    transition: opacity 0.2s ease;
+                }
+                .modal-overlay.active {
+                    display: block;
+                    opacity: 1;
+                }
+                .info-modal {
+                    display: none;
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100vw;
+                    height: 100vh;
+                    padding: 24px;
+                    box-sizing: border-box;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 2147483647;
+                }
+                .info-modal.active {
+                    display: flex;
+                }
+                .info-modal__card {
+                    width: min(460px, 92vw);
+                    padding: 32px 36px 28px 36px;
+                    border-radius: 22px;
+                    background: radial-gradient(circle at 20% 20%, #fff8e1 0%, #ffe082 55%, #ffca28 100%);
+                    box-shadow: 0 25px 60px rgba(255, 179, 0, 0.35);
+                    color: #3e2a00;
+                    position: relative;
+                    overflow: hidden;
+                }
+                .info-modal__card--ideas {
+                    background: radial-gradient(circle at 15% 30%, #fff 0%, #ffe7b0 50%, #ffb74d 100%);
+                }
+                .info-modal__card::after {
+                    content: '';
+                    position: absolute;
+                    inset: 0;
+                    background: radial-gradient(circle at 85% 15%, rgba(255,255,255,0.9) 0%, transparent 55%);
+                    pointer-events: none;
+                    opacity: 0.5;
+                }
+                .info-modal__title {
+                    font-size: 1.45em;
+                    margin: 0 0 12px 0;
+                    color: #5e3b00;
+                    position: relative;
+                    z-index: 1;
+                }
+                .info-modal__body {
+                    font-size: 1.05em;
+                    line-height: 1.5;
+                    color: #4a3200;
+                    position: relative;
+                    z-index: 1;
+                }
+                .info-modal__close {
+                    position: absolute;
+                    top: 12px;
+                    right: 16px;
+                    border: none;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    width: 36px;
+                    height: 36px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.3em;
+                    color: #a17200;
+                    cursor: pointer;
+                    z-index: 2;
+                    transition: transform 0.15s ease, background 0.15s ease;
+                }
+                .info-modal__close:hover {
+                    transform: scale(1.05);
+                    background: rgba(255, 255, 255, 0.55);
+                }
+                .password-card {
+                    background: #fffbe7;
+                    border-radius: 18px;
+                    box-shadow: 0 12px 48px rgba(0,0,0,0.25);
+                    padding: 32px 28px 28px 28px;
+                    width: min(420px, 100%);
+                    box-sizing: border-box;
+                    position: relative;
+                    text-align: center;
+                }
+                .password-card h2 {
+                    color: #ffb300;
+                    margin: 0 0 12px 0;
+                }
+                .password-card p {
+                    color: #a67c00;
+                    margin: 0 0 18px 0;
+                    font-size: 1.02em;
+                }
+                .password-input-wrapper {
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 14px;
+                }
+                .password-input {
+                    width: 100%;
+                    border: 1.5px solid #ffe082;
+                    border-radius: 9px;
+                    padding: 12px 42px 12px 14px;
+                    font-size: 1.05em;
+                    background: #fff;
+                    box-sizing: border-box;
+                }
+                .password-helper {
+                    text-align: right;
+                    margin-top: -4px;
+                    margin-bottom: 8px;
+                }
+                .password-helper button {
+                    background: none;
+                    border: none;
+                    color: #c47b00;
+                    font-size: 0.92em;
+                    font-weight: 600;
+                    cursor: pointer;
+                    text-decoration: underline;
+                }
+                .password-helper button:hover {
+                    color: #8a5600;
+                }
+                .secret-form {
+                    display: none;
+                    text-align: left;
+                    background: #fffdf3;
+                    border: 1px dashed #ffe082;
+                    border-radius: 10px;
+                    padding: 12px;
+                    margin-bottom: 12px;
+                }
+                .secret-form.active {
+                    display: block;
+                }
+                .secret-form label {
+                    font-size: 0.92em;
+                    color: #a67c00;
+                    display: block;
+                    margin-bottom: 6px;
+                }
+                .secret-form .secret-input-wrapper {
+                    display: flex;
+                    gap: 8px;
+                    align-items: center;
+                }
+                .secret-form input {
+                    flex: 1;
+                    border: 1.3px solid #ffd054;
+                    border-radius: 8px;
+                    padding: 8px 10px;
+                    font-size: 1em;
+                }
+                .secret-form button {
+                    border: none;
+                    background: linear-gradient(90deg,#ffb300,#ffd54f);
+                    color: #fff;
+                    font-weight: 600;
+                    border-radius: 8px;
+                    padding: 8px 12px;
+                    cursor: pointer;
+                }
+                .secret-form small {
+                    display: block;
+                    margin-top: 6px;
+                    color: #c62828;
+                    min-height: 18px;
+                }
+                .secret-success {
+                    font-size: 0.95em;
+                    color: #2e7d32;
+                    min-height: 18px;
+                    margin: 4px 0 8px 0;
+                }
+                .secret-reset {
+                    margin-top: 12px;
+                    padding-top: 12px;
+                    border-top: 1px solid #ffe082;
+                }
+                .secret-reset[aria-hidden="true"] {
+                    display: none;
+                }
+                .password-toggle {
+                    position: absolute;
+                    right: 10px;
+                    border: none;
+                    background: none;
+                    color: #a67c00;
+                    font-size: 1.4em;
+                    cursor: pointer;
+                    padding: 4px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .password-error {
+                    color: #c62828;
+                    min-height: 22px;
+                    font-size: 0.95em;
+                    margin-top: 6px;
+                }
+                .password-error.success {
+                    color: #2e7d32;
+                }
+                .password-actions {
+                    display: flex;
+                    gap: 12px;
+                    justify-content: center;
+                }
+                .password-confirm-btn,
+                .password-cancel-btn {
+                    flex: 1;
+                    border: none;
+                    border-radius: 8px;
+                    padding: 10px 0;
+                    font-size: 1.05em;
+                    font-weight: 600;
+                    cursor: pointer;
+                }
+                .password-confirm-btn {
+                    background: linear-gradient(90deg, #ffb300 60%, #ffd54f 100%);
+                    color: #fff;
+                    box-shadow: 0 2px 8px rgba(255,179,0,0.2);
+                }
+                .password-cancel-btn {
+                    background: #ffe082;
+                    color: #a67c00;
+                }
+                .password-close-btn {
+                    position: absolute;
+                    top: 14px;
+                    right: 18px;
+                    background: none;
+                    border: none;
+                    font-size: 1.6em;
+                    color: #a67c00;
+                    cursor: pointer;
+                }
+                .copy-btn {
+                    background: #ffb300;
+                    color: #fff;
+                    border: none;
+                    border-radius: 6px;
+                    padding: 4px 10px;
+                    font-size: 0.98em;
+                    cursor: pointer;
+                    margin-left: 6px;
+                }
+                .close-btn {
+                    background: #ffd54f;
+                    color: #a67c00;
+                    border: none;
+                    border-radius: 50px;
+                    padding: 6px 16px;
+                    font-size: 1em;
+                    cursor: pointer;
+                    margin-top: 18px;
+                }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #fff;
+            background: url('Imagen1.JPG') no-repeat center center fixed, linear-gradient(180deg, #2c2c2c 0%, #444 100%);
+            background-size: cover;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.55);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .container, .neuron-bg, .halo, .header, .steps, .qr-area, .banner, .program, form, .footer {
+            position: relative;
+            z-index: 0;
+        }
+        .neuron-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.22;
+            background: none;
+        }
+        .halo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% 30%, #ffe082 0%, #ffd54f 30%, transparent 80%);
+            z-index: 0;
+            filter: blur(32px) brightness(1.15);
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .container {
+            max-width: 800px;
+            margin: 48px auto 32px auto;
+            background: rgba(255,255,255,0.98);
+            border-radius: 28px;
+            box-shadow: 0 8px 32px rgba(255,179,0,0.18);
+            padding: 44px 32px 32px 32px;
+            position: relative;
+            z-index: 3;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 18px;
+            position: relative;
+        }
+        .header .bulb {
+            width: 120px;
+            margin-bottom: 8px;
+            animation: bulbGlow 2.2s infinite alternate;
+            filter: drop-shadow(0 0 32px #ffd70088);
+        }
+        @keyframes bulbGlow {
+            0% { filter: drop-shadow(0 0 0px #ffd70088); }
+            100% { filter: drop-shadow(0 0 32px #ffd700cc); }
+        }
+        .header h1 {
+              font-size: 3em;
+              margin: 0 0 8px 0;
+              letter-spacing: 2.5px;
+              font-family: 'Montserrat', Arial, sans-serif;
+              font-weight: 900;
+              color: #111;
+              background: none;
+              text-shadow: none;
+              position: relative;
+              filter: none !important;
+          }
+
+        .header h1::after {
+            content: "";
+            display: block;
+            margin: 12px auto 0 auto;
+            width: 80%;
+            height: 5px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #ffd700 0%, #ffb300 50%, #ffd700 100%);
+            box-shadow: 0 2px 12px #ffd70099;
+            opacity: 1;
+        }
+        .subtitle {
+            color: #222;
+            font-size: 1.18em;
+            margin-bottom: 8px;
+            font-weight: 600;
+            text-shadow: 0 1px 8px #fffbe7cc;
+        }
+        .highlight {
+            color: #ffb300;
+            font-weight: bold;
+        }
+        .banner {
+            background: linear-gradient(90deg, #ffb300 60%, #ffd54f 100%);
+            color: #222;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 8px;
+            padding: 10px 0;
+            margin-bottom: 20px;
+            font-size: 1.13em;
+            letter-spacing: 1.2px;
+            box-shadow: 0 2px 8px rgba(255,179,0,0.13);
+            /* text-transform: uppercase; */
+            text-shadow: 1px 1px 0 #fffbe7, 0 2px 8px #0002;
+            z-index: 10 !important;
+        }
+        .program {
+            background: #fffbe7;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 22px;
+            color: #a67c00;
+            font-size: 1.05em;
+            border-left: 6px solid #ffb300;
+            box-shadow: 0 2px 8px #ffe08233;
+        }
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            gap: 8px;
+        }
+        .step {
+            flex: 1;
+            background: #fffbe7;
+            border-radius: 10px;
+            padding: 10px 8px 8px 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px #ffe08233;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        .step:hover {
+            transform: translateY(-6px) scale(1.04);
+            box-shadow: 0 8px 24px #ffd54f55;
+        }
+        .step-icon {
+            font-size: 1.7em;
+            color: #ffb300;
+            margin-bottom: 4px;
+            display: block;
+        }
+        .step-label {
+            font-size: 0.98em;
+            color: #a67c00;
+        }
+        .qr-area {
+            text-align: center;
+            margin: 18px 0 18px 0;
+        }
+        .qr-img {
+            width: 110px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(255,179,0,0.18);
+            transition: transform 0.2s;
+        }
+        .qr-img:hover {
+            transform: scale(1.08) rotate(-3deg);
+            box-shadow: 0 8px 32px #ffd54f55;
+        }
+        .qr-label {
+            margin-top: 6px;
+            color: #a67c00;
+            font-size: 1.01rem;
+            font-weight: 500;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            margin-top: 10px;
+        }
+        label {
+            color: #111;
+            font-weight: 600;
+            font-size: 1.05em;
+            letter-spacing: 0.2px;
+            text-shadow: 0 1px 8px #fffbe7cc;
+        }
+
+
+                    textarea {
+                        resize: none !important;
+            border: 1px solid #ffe082;
+            border-radius: 7px;
+            padding: 9px;
+            font-size: 1em;
+            background: #fffbe7;
+            color: #333;
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        input:focus, textarea:focus, select:focus {
+            border: 1.5px solid #ffb300;
+            outline: none;
+            box-shadow: 0 0 8px #ffd54f55;
+        }
+        button {
+            background: linear-gradient(90deg, #ffb300 60%, #ffd54f 100%);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 1.13em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(255,179,0,0.12);
+        }
+        button:hover {
+            background: linear-gradient(90deg, #ffd54f 0%, #ffb300 100%);
+            transform: scale(1.04);
+            box-shadow: 0 8px 24px #ffd54f55;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            color: #a67c00;
+            font-size: 1.05em;
+            opacity: 0;
+            animation: fadeInFooter 1.2s 1.2s forwards;
+        }
+        @keyframes fadeInFooter {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: none; }
+        }
+    </style>
+</style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script>
+        // Inicializa Firebase solo una vez para compartir la instancia en toda la página
+        (function inicializarFirebase(){
+            const firebaseConfig = {
+                apiKey: "AIzaSyCSJvvvyiY9-419R1gETR6lopy2P1vQbkY",
+                authDomain: "despertando-ideas.firebaseapp.com",
+                databaseURL: "https://despertando-ideas-default-rtdb.firebaseio.com",
+                projectId: "despertando-ideas",
+                storageBucket: "despertando-ideas.firebasestorage.app",
+                messagingSenderId: "677954954360",
+                appId: "1:677954954360:web:9cc25ac38c1362282ff98d",
+                measurementId: "G-ZCFT4Z84TE"
+            };
+            if (typeof firebase === 'undefined') {
+                console.error('No se pudo cargar el SDK de Firebase.');
+                return;
+            }
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            window.db = firebase.database();
+        })();
+    </script>
+    <style>
+    /* Menú lateral */
+    .side-menu {
+        position: fixed;
+        top: 0;
+        left: -240px;
+        width: 220px;
+        height: 100vh;
+        background: #222b;
+        box-shadow: 2px 0 16px #0005;
+        z-index: 300;
+        display: flex;
+        flex-direction: column;
+        padding: 48px 18px 18px 18px;
+        transition: left 0.3s cubic-bezier(.4,2,.6,1);
+    }
+    .side-menu.active {
+        left: 0;
+    }
+    .side-menu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .side-menu li {
+        margin-bottom: 22px;
+    }
+    .side-menu a {
+        color: #ffd54f;
+        font-size: 1.18em;
+        font-weight: bold;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: color 0.2s;
+    }
+    .side-menu a:hover {
+        color: #fffbe7;
+    }
+    .side-menu .close-menu {
+        position: absolute;
+        top: 12px;
+        right: 18px;
+        background: none;
+        border: none;
+        color: #ffd54f;
+        font-size: 1.5em;
+        cursor: pointer;
+    }
+    </style>
+</head>
+<body>
+                <nav class="side-menu" id="sideMenu">
+                    <button class="close-menu" id="closeMenuBtn">×</button>
+                    <ul>
+                        <li><a href="#" id="panelControlLink">• Panel de control</a></li>
+                        <li><a href="#" id="consultaLink">• Consulta</a></li>
+                        <!-- Panel de Consulta -->
+                        <div class="modal-flotante" id="consultaContainer" style="display:none; background:rgba(30,30,30,0.32); min-height:100vh; min-width:100vw; position:fixed; top:0; left:0; z-index:9999; margin:0; padding:0;">
+                            <div style="background:#fffbe7; border-radius:18px; box-shadow:0 8px 40px #2225, 0 1.5px 0 #ffd54f55; max-width:700px; width:90vw; min-height:420px; margin:auto; padding:38px 32px 32px 32px; position:relative; display:flex; flex-direction:column; align-items:center;">
+                                <button onclick="volverInicio()" style="position:absolute; top:18px; left:24px; z-index:1001; background:#ffd54f; color:#a67c00; border:none; border-radius:8px; padding:10px 22px; font-size:1.1em; font-weight:bold; cursor:pointer; box-shadow:0 2px 12px #ffd54f99;">Volver al inicio</button>
+                                <div class="header" style="background: linear-gradient(90deg, #ffb300 60%, #ffd54f 100%); color: #222; padding: 18px 0 10px 0; text-align: center; font-size: 2.1em; font-weight: 900; letter-spacing: 2px; box-shadow: 0 2px 12px #ffd54f55; border-radius:12px; width:100%;">Consulta de Ideas</div>
+                                <h2 style="color:#ffb300; margin-bottom:18px; font-size:1.3em; text-align:center; width:100%;">Consulta tus propuestas</h2>
+                                <form id="consultaForm" style="display:flex; gap:12px; align-items:center; margin-bottom:18px; justify-content:center; width:100%; max-width:520px;">
+                                    <input type="text" id="consultaDocumento" placeholder="Ingresa tu número de documento" style="padding:12px 16px; border-radius:9px; border:1.5px solid #ffe082; font-size:1.1em; background:#fffbe7; min-width:200px; max-width:320px; flex:1;">
+                                    <button type="submit" style="background:#ffb300; color:#fff; border:none; border-radius:9px; padding:12px 28px; font-size:1.1em; font-weight:bold; cursor:pointer; transition:background 0.2s; white-space:nowrap; box-shadow:0 2px 8px #ffd54f55;">Consultar</button>
+                                </form>
+                                <div id="consultaResultados" style="margin-top:18px; width:100%; min-height:60px; max-height:320px; overflow:auto; cursor:grab;"></div>
+                                <!-- Botón reubicado arriba a la izquierda -->
+                            </div>
+                            <!-- script y botón ahora están dentro del div modal -->
+                        </div>
+                    <script>
+                    // Mostrar panel de consulta al hacer clic en el menú
+                    document.getElementById('consultaLink').onclick = function(e) {
+                        e.preventDefault();
+                        document.body.style.overflow = 'hidden';
+                        document.getElementById('formularioContainer').style.display = 'none';
+                        document.getElementById('panelControlContainer').style.display = 'none';
+                        document.getElementById('consultaContainer').style.display = '';
+                        if (typeof window.cerrarMenuLateral === 'function') {
+                            window.cerrarMenuLateral();
+                        } else {
+                            document.getElementById('sideMenu').classList.remove('active');
+                        }
+                    };
+                    function volverInicio() {
+                        document.body.style.overflow = '';
+                        document.getElementById('consultaContainer').style.display = 'none';
+                        document.getElementById('formularioContainer').style.display = '';
+                    }
+                    // Consulta por documento
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var form = document.getElementById('consultaForm');
+                        if(form) {
+                            form.onsubmit = function(e) {
+                                e.preventDefault();
+                                const doc = document.getElementById('consultaDocumento').value.trim();
+                                if (!doc) return;
+                                const resDiv = document.getElementById('consultaResultados');
+                                resDiv.innerHTML = '<span style="color:#888">Buscando en la base de datos...</span>';
+                                // Buscar en Firebase todas las encuestas donde documento == doc
+                                db.ref('encuestas').orderByChild('documento').equalTo(doc).once('value', function(snapshot) {
+                                    let resultados = [];
+                                    snapshot.forEach(function(child) {
+                                        resultados.push(child.val());
+                                    });
+                                    let html = '';
+                                    if (resultados.length === 0) {
+                                        html = '<div style="color:#a67c00; font-size:1.1em; margin-top:18px;">No se encontraron ideas registradas con ese documento.</div>';
+                                    } else {
+                                        html = `<table style="width:100%; border-collapse:collapse; background:#fffbe7; color:#222; font-size:1em; box-shadow:0 2px 12px #ffd54f33; border-radius:10px; overflow:hidden;">
+                                            <thead>
+                                                <tr style="background:#ffecb3;color:#a67c00;">
+                                                    <th style='border:1px solid #ffd54f; padding:10px 8px;'>Propuesta</th>
+                                                    <th style='border:1px solid #ffd54f; padding:10px 8px;'>Justificación</th>
+                                                    <th style='border:1px solid #ffd54f; padding:10px 8px;'>Tipo de mejora</th>
+                                                    <th style='border:1px solid #ffd54f; padding:10px 8px;'>Tipo de idea</th>
+                                                    <th style='border:1px solid #ffd54f; padding:10px 8px;'>Áreas involucradas</th>
+                                                    <th style='border:1px solid #ffd54f; padding:10px 8px;'>Estado</th>
+                                                    <th style='border:1px solid #ffd54f; padding:10px 8px;'>Avance</th>
+                                                </tr>
+                                            </thead><tbody>`;
+                                        resultados.forEach(e => {
+                                            const areas = (e.areas_involucradas||'').split(',').map(x=>x.trim()).filter(x=>x).join(', ');
+                                            const areasSel = (e.areas_involucradas||'').split(',').map(x=>x.trim()).filter(x=>x);
+                                            const areasCumplidas = (e.areas_cumplidas||'').split(',').map(x=>x.trim()).filter(x=>x);
+                                            let porcentajeAvance = 0;
+                                            if (areasSel.length > 0) {
+                                                porcentajeAvance = Math.round((areasCumplidas.length / areasSel.length) * 100);
+                                            }
+                                            html += `<tr>
+                                                <td style='border:1px solid #ffd54f; padding:10px 8px;'>${e.propuesta||''}</td>
+                                                <td style='border:1px solid #ffd54f; padding:10px 8px;'>${e.justificacion||''}</td>
+                                                <td style='border:1px solid #ffd54f; padding:10px 8px;'>${e.tipo_mejora||''}</td>
+                                                <td style='border:1px solid #ffd54f; padding:10px 8px;'>${e.tipo_idea||''}</td>
+                                                <td style='border:1px solid #ffd54f; padding:10px 8px;'>${areas}</td>
+                                                <td style='border:1px solid #ffd54f; padding:10px 8px;'>${e.estado_idea||''}</td>
+                                                <td style='border:1px solid #ffd54f; padding:10px 8px;'>${porcentajeAvance}%</td>
+                                            </tr>`;
+                                        });
+                                        html += '</tbody></table>';
+                                    }
+                                    resDiv.innerHTML = html;
+                                });
+                            };
+                        }
+                    });
+                    </script>
+                    </ul>
+                </nav>
+            <!-- Botón menú hamburguesa -->
+            <button class="menu-btn" id="menuBtn" type="button" aria-label="Abrir menú principal" aria-expanded="false">
+                <svg class="menu-btn__icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                    <defs>
+                        <linearGradient id="menuLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#ffefc1"/>
+                            <stop offset="45%" stop-color="#ffd44f"/>
+                            <stop offset="100%" stop-color="#ffb300"/>
+                        </linearGradient>
+                    </defs>
+                    <rect class="menu-btn__line menu-btn__line--short" x="7" y="7" width="18" height="3" rx="1.5"/>
+                    <rect class="menu-btn__line menu-btn__line--center" x="5" y="14.5" width="22" height="3" rx="1.5"/>
+                    <rect class="menu-btn__line menu-btn__line--short" x="7" y="22" width="18" height="3" rx="1.5"/>
+                </svg>
+            </button>
+        <script>
+        (function inicializarMenuLateral(){
+            const menu = document.getElementById('sideMenu');
+            const btn = document.getElementById('menuBtn');
+            const closeBtn = document.getElementById('closeMenuBtn');
+            if (!menu || !btn) return;
+
+            const toggleMenu = estado => {
+                menu.classList.toggle('active', estado);
+                btn.setAttribute('aria-expanded', estado ? 'true' : 'false');
+                btn.classList.toggle('menu-btn--hidden', estado);
+            };
+
+            window.abrirMenuLateral = () => toggleMenu(true);
+            window.cerrarMenuLateral = () => toggleMenu(false);
+
+            btn.addEventListener('click', evt => {
+                evt.stopPropagation();
+                toggleMenu(true);
+            });
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', evt => {
+                    evt.preventDefault();
+                    toggleMenu(false);
+                });
+            }
+
+            document.addEventListener('click', evt => {
+                if (!menu.classList.contains('active')) return;
+                if (menu.contains(evt.target) || btn.contains(evt.target)) return;
+                toggleMenu(false);
+            });
+        })();
+        </script>
+        <!-- Botón flotante compartir -->
+        <button class="share-btn" id="openShareModal">
+            <span>Compartir</span>
+            <span style="font-size:1.4em;">🔗</span>
+        </button>
+        <!-- Modal compartir -->
+        <div class="share-modal" id="shareModal">
+            <div class="share-content">
+                <h2>Comparte esta página</h2>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://despertando-ideas.web.app/MentesBrillantes.html" alt="QR para compartir" class="qr-img-modal">
+                <div class="share-link">
+                    <span id="pageLink">https://despertando-ideas.web.app/MentesBrillantes.html</span>
+                    <button class="copy-btn" id="copyLinkBtn">Copiar</button>
+                </div>
+                <button class="close-btn" id="closeShareModal">Cerrar</button>
+            </div>
+        </div>
+        <!-- Modal contraseña panel -->
+        <div class="password-modal" id="panelPasswordModal" aria-hidden="true">
+            <div class="password-card" role="dialog" aria-labelledby="panelPasswordTitle" aria-modal="true">
+                <button class="password-close-btn" id="closePasswordModal" aria-label="Cerrar">×</button>
+                <h2 id="panelPasswordTitle">Acceso restringido</h2>
+                <p>Ingresa la contraseña para abrir el Panel de control.</p>
+                <form id="panelPasswordForm">
+                    <div class="password-input-wrapper">
+                        <input type="password" id="panelPasswordInput" class="password-input" placeholder="Contraseña" autocomplete="current-password" required>
+                        <button type="button" class="password-toggle" id="panelPasswordToggle" aria-label="Mostrar u ocultar contraseña" aria-pressed="false">👁</button>
+                    </div>
+                    <div class="password-helper"><button type="button" id="forgotPasswordBtn">¿Olvidé mi contraseña?</button></div>
+                    <div class="secret-form" id="secretCodeForm" aria-hidden="true">
+                        <label for="secretCodeInput">Ingresa la clave secreta</label>
+                        <div class="secret-input-wrapper">
+                            <input type="password" id="secretCodeInput" placeholder="•••••••••" inputmode="numeric" autocomplete="one-time-code">
+                            <button type="button" id="secretCodeSubmit">Validar</button>
+                        </div>
+                        <small id="secretCodeError"></small>
+                        <p class="secret-success" id="secretCodeSuccess" aria-live="polite"></p>
+                        <div class="secret-reset" id="newPasswordSection" aria-hidden="true">
+                            <label for="newPasswordInput">Ingresa la nueva contraseña</label>
+                            <div class="secret-input-wrapper">
+                                <input type="password" id="newPasswordInput" placeholder="Nueva contraseña" autocomplete="new-password">
+                                <button type="button" id="updatePasswordBtn">Actualizar</button>
+                            </div>
+                            <small id="newPasswordError"></small>
+                        </div>
+                    </div>
+                    <div class="password-actions">
+                        <button type="button" class="password-cancel-btn" id="cancelPasswordModal">Cancelar</button>
+                        <button type="submit" class="password-confirm-btn">Ingresar</button>
+                    </div>
+                    <div class="password-error" id="panelPasswordError" role="alert"></div>
+                </form>
+            </div>
+        </div>
+    <div class="container" id="formularioContainer">
+        <!-- Fondo de líneas doradas eliminado -->
+        <div class="header">
+            <img src="Imagen3.png" alt="Bombilla Mente Brillante" class="bulb" style="width:220px; height:auto; background: none; border-radius:0; box-shadow:none; object-fit:contain; mix-blend-mode:screen;">
+            <h1>DESPERTANDO IDEAS</h1>
+            <img src="Imagen4.png" alt="Imagen decorativa" style="width:90px; height:auto; margin: 12px auto 0 auto; display:block;">
+            <div class="subtitle">Comparte tu idea de <span class="highlight">mejora</span></div>
+        </div>
+        <div class="steps">
+            <!-- Overlay bloqueador para el modal Lean -->
+            <div id="overlayLean" class="modal-overlay" aria-hidden="true"></div>
+            <div class="step">
+                <button class="step-btn" onclick="abrirModalLean()" style="background:none;border:none;cursor:pointer;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <span class="step-icon">📝</span>
+                    <span class="step-label">¿Que es Lean?</span>
+                </button>
+            </div>
+            <div class="step">
+                <button class="step-btn" onclick="abrirModalIdeas()" style="background:none;border:none;cursor:pointer;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                    <span class="step-icon">🚀</span>
+                    <span class="step-label">Tpos de ideas..</span>
+                </button>
+            </div>
+            <!-- Modal ¿Qué es Lean? -->
+            <div id="modalLean" class="info-modal" aria-hidden="true">
+                <article class="info-modal__card" role="dialog" aria-labelledby="modalLeanTitle">
+                    <button type="button" class="info-modal__close" aria-label="Cerrar" onclick="cerrarModalLean()">×</button>
+                    <h2 id="modalLeanTitle" class="info-modal__title">¿Qué es Lean?</h2>
+                    <p class="info-modal__body">
+                        Lean es una metodología de gestión que promueve la mejora continua de los procesos, enfocándose en simplificar la forma de trabajo, reducir reprocesos y asegurar que las actividades generen valor, con el objetivo de lograr mejores resultados de manera sostenible.
+                    </p>
+                </article>
+            </div>
+            <!-- Modal Tipos de ideas -->
+            <!-- Overlay bloqueador para el modal Tipos de ideas -->
+            <div id="overlayIdeas" class="modal-overlay" aria-hidden="true"></div>
+            <div id="modalIdeas" class="info-modal" aria-hidden="true">
+                <article class="info-modal__card info-modal__card--ideas" role="dialog" aria-labelledby="modalIdeasTitle">
+                    <button type="button" class="info-modal__close" aria-label="Cerrar" onclick="cerrarModalIdeas()">×</button>
+                    <h2 id="modalIdeasTitle" class="info-modal__title">💡 Tipos de ideas del programa</h2>
+                    <p class="info-modal__body">
+                        <strong>1. Ideas de Ahorro:</strong> propuestas orientadas a generar ahorros y uso eficiente del presupuesto.<br><br>
+                        <strong>2. Ideas de Mejora:</strong> iniciativas enfocadas en mejorar procesos, formas de trabajo y resultados.<br><br>
+                        <strong>3. Ideas de Clima:</strong> acciones dirigidas a fortalecer el clima laboral, la convivencia y el bienestar del equipo.
+                    </p>
+                </article>
+            </div>
+            <script>
+            function alternarModalInfo(modalId, overlayId, mostrar) {
+                const modal = document.getElementById(modalId);
+                const overlay = document.getElementById(overlayId);
+                if (!modal || !overlay) return;
+                if (mostrar) {
+                    modal.classList.add('active');
+                    overlay.classList.add('active');
+                    modal.setAttribute('aria-hidden', 'false');
+                    overlay.setAttribute('aria-hidden', 'false');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    modal.classList.remove('active');
+                    overlay.classList.remove('active');
+                    modal.setAttribute('aria-hidden', 'true');
+                    overlay.setAttribute('aria-hidden', 'true');
+                    document.body.style.overflow = '';
+                }
+            }
+            function abrirModalLean() {
+                alternarModalInfo('modalLean', 'overlayLean', true);
+            }
+            function cerrarModalLean() {
+                alternarModalInfo('modalLean', 'overlayLean', false);
+            }
+            function abrirModalIdeas() {
+                alternarModalInfo('modalIdeas', 'overlayIdeas', true);
+            }
+            function cerrarModalIdeas() {
+                alternarModalInfo('modalIdeas', 'overlayIdeas', false);
+            }
+            ['overlayLean', 'overlayIdeas'].forEach(id => {
+                const overlay = document.getElementById(id);
+                if (overlay) {
+                    overlay.addEventListener('click', () => {
+                        if (id === 'overlayLean') cerrarModalLean();
+                        if (id === 'overlayIdeas') cerrarModalIdeas();
+                    });
+                }
+            });
+            </script>
+        </div>  
+        <!-- QR eliminado de la sección principal -->
+        <div class="banner"><span style="font-size:1.2em;vertical-align:middle;">🚀</span> imagina lo extraordinario</div>
+        <div class="program">
+            <strong>El Programa Despertando Ideas (Mentes Brillantes)</strong><br>
+            Tiene como objetivo captar iniciativas orientadas a la mejora de procesos, impulsar la mejora continua y reconocer las propuestas de mayor impacto..
+        </div>
+        <form id="formularioPropuesta" onsubmit="event.preventDefault(); guardarEncuestaDesdeFormulario();">
+            <label for="nombre">1. Nombres y Apellidos (Proponente)</label>
+            <input type="text" id="nombre" name="nombre" required autocorrect="on" autocapitalize="sentences" style="background:#fffbe7; border:1.5px solid #ffe082; border-radius:8px; padding:10px 12px; font-size:1.08em; width:100%; box-sizing:border-box; margin-bottom:8px;">
+            <label for="documento">2. Número de Documento</label>
+            <input type="text" id="documento" name="documento" required autocorrect="on" autocapitalize="sentences" style="background:#fffbe7; border:1.5px solid #ffe082; border-radius:8px; padding:10px 12px; font-size:1.08em; width:100%; box-sizing:border-box; margin-bottom:8px;">
+            <label for="telefono">3. Número de celular</label>
+            <input type="text" id="telefono" name="telefono" required autocorrect="on" autocapitalize="sentences" style="background:#fffbe7; border:1.5px solid #ffe082; border-radius:8px; padding:10px 12px; font-size:1.08em; width:100%; box-sizing:border-box; margin-bottom:8px;">
+            <label for="area">4. Área o proceso al cual pertenece el proponente</label>
+            <div id="area" name="area" required style="margin-bottom: 12px;">
+                <label style="display:block; margin-bottom:10px;"><input type="radio" name="area" value="Maquillajes" required> Maquillajes</label>
+                <label style="display:block; margin-bottom:10px;"><input type="radio" name="area" value="Emulsiones"> Emulsiones</label>
+                <label style="display:block; margin-bottom:10px;"><input type="radio" name="area" value="Hidroalcoholes"> Hidroalcoholes</label>
+                <label style="display:block; margin-bottom:10px;"><input type="radio" name="area" value="Almacén"> Almacén</label>
+                <label style="display:block; margin-bottom:10px;"><input type="radio" name="area" value="Cendis"> Cendis</label>
+                <label style="display:block; margin-bottom:10px;"><input type="radio" name="area" value="Mantenimiento"> Mantenimiento</label>
+                <label style="display:block; margin-bottom:10px;"><input type="radio" name="area" value="Calidad"> Calidad</label>
+                <label style="display:block; margin-bottom:10px;"><input type="radio" name="area" value="LEAN"> LEAN</label>
+                <label style="display:block; margin-bottom:10px;"><input type="radio" name="area" value="TTCA"> TTCA</label>
+            </div>
+            <label for="situacion">5. Situación actual: ¿Cuál es la situación que vamos a mejorar?</label>
+            <textarea id="situacion" name="situacion" rows="2" required autocorrect="on" autocapitalize="sentences"></textarea>
+            <label for="propuesta">6. Propuesta: Descripción detallada de la idea especificando nombre de producto/proceso</label>
+            <textarea id="propuesta" name="propuesta" rows="3" required autocorrect="on" autocapitalize="sentences"></textarea>
+            <label for="justificacion">7. Justificación: ¿Cuáles son los beneficios de implementar la idea?</label>
+            <textarea id="justificacion" name="justificacion" rows="2" required autocorrect="on" autocapitalize="sentences"></textarea>
+            <label for="correo">8. Correo electrónico</label>
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:18px;">
+                <input type="text" id="correoPersonalizado" placeholder="usuario" required style="background:#fffbe7; border:1.5px solid #ffe082; border-radius:8px; padding:10px 8px; font-size:1.08em; width:50%; box-sizing:border-box;">
+                <span style="font-size:1.1em; color:#a67c00;">@</span>
+                <select id="correoDominio" required style="background:#fffbe7; border:1.5px solid #ffe082; border-radius:8px; padding:10px 8px; font-size:1.08em; width:48%; box-sizing:border-box;">
+                    <option value="" disabled selected hidden>Selecciona un dominio</option>
+                    <option value="gmail.com">gmail.com</option>
+                    <option value="hotmail.com">hotmail.com</option>
+                    <option value="outlook.com">outlook.com</option>
+                    <option value="yahoo.com">yahoo.com</option>
+                    <option value="icloud.com">icloud.com</option>
+                    <option value="live.com">live.com</option>
+                    <option value="belcorp.biz">belcorp.biz</option>
+                </select>
+            </div>
+            <script>
+            function actualizarCorreoCompleto() {
+                const usuario = document.getElementById('correoPersonalizado').value.trim();
+                const dominio = document.getElementById('correoDominio').value;
+                const correoInput = document.getElementById('correo');
+                if (usuario && dominio) {
+                    correoInput.value = usuario + '@' + dominio;
+                } else {
+                    correoInput.value = '';
+                }
+            }
+            document.getElementById('correoPersonalizado').addEventListener('input', actualizarCorreoCompleto);
+            document.getElementById('correoDominio').addEventListener('change', actualizarCorreoCompleto);
+            </script>
+            <input type="hidden" id="correo" name="correo" required>
+
+
+            <datalist id="sugerencias-correos">
+                <option value="@gmail.com">
+                <option value="@hotmail.com">
+                <option value="@outlook.com">
+                <option value="@yahoo.com">
+                <option value="@icloud.com">
+                <option value="@live.com">
+                <option value="@aol.com">
+                <option value="@protonmail.com">
+                <option value="@mail.com">
+                <option value="@msn.com">
+            </datalist>
+            <label for="tipo_mejora">9. Tipo de mejora (Elije la categoría en la que se clasifica tu idea de mejora)</label>
+                <div id="tipo_mejora" style="margin-bottom: 12px;">
+                                <small style="display:block; margin-bottom:8px; color:#555; font-style:italic;">Seleccione como máximo 2 opciones.</small>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_mejora" value="Producto" onclick="limitarCheckboxes(this, 2)"> Producto
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_mejora" value="Medio ambiente" onclick="limitarCheckboxes(this, 2)"> Medio ambiente
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_mejora" value="Proceso" onclick="limitarCheckboxes(this, 2)"> Proceso
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_mejora" value="Mantenimiento y/o equipos" onclick="limitarCheckboxes(this, 2)"> Mantenimiento y/o equipos
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_mejora" value="Calidad" onclick="limitarCheckboxes(this, 2)"> Calidad
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_mejora" value="Bienestar/Salud y seguridad en el trabajo" onclick="limitarCheckboxes(this, 2)"> Bienestar / Salud y seguridad en el trabajo
+                                </label>
+                </div>
+                <script>
+                function limitarCheckboxes(checkbox, max) {
+                    const checkboxes = document.querySelectorAll('input[name="tipo_mejora"]');
+                    const checked = Array.from(checkboxes).filter(cb => cb.checked);
+                    if (checked.length > max) {
+                        checkbox.checked = false;
+                        alert('Solo puedes seleccionar hasta ' + max + ' opciones.');
+                    }
+                }
+                </script>
+            <label for="tipo_idea">10. Tipo de idea</label>
+                        <div id="tipo_idea" style="margin-bottom: 12px;">
+                                <small style="display:block; margin-bottom:8px; color:#555; font-style:italic;">Seleccione como máximo 2 opciones.</small>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_idea" value="Mejora de proceso" onclick="limitarCheckboxesIdea(this, 2)"> Mejora de proceso
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_idea" value="Clima laboral" onclick="limitarCheckboxesIdea(this, 2)"> Clima laboral
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_idea" value="Ahorro de costos" onclick="limitarCheckboxesIdea(this, 2)"> Ahorro de costos
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_idea" value="Seguridad y SST" onclick="limitarCheckboxesIdea(this, 2)"> Seguridad y SST
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_idea" value="Calidad" onclick="limitarCheckboxesIdea(this, 2)"> Calidad
+                                </label>
+                                <label style="display:block; margin-bottom:14px; font-weight:600; font-size:1.15em;">
+                                    <input type="checkbox" name="tipo_idea" value="Innovación" onclick="limitarCheckboxesIdea(this, 2)"> Innovación
+                                </label>
+                        <script>
+                        function limitarCheckboxesIdea(checkbox, max) {
+                                const checkboxes = document.querySelectorAll('input[name="tipo_idea"]');
+                                const checked = Array.from(checkboxes).filter(cb => cb.checked);
+                                if (checked.length > max) {
+                                        checkbox.checked = false;
+                                        alert('Solo puedes seleccionar hasta ' + max + ' opciones.');
+                                }
+                        }
+                        </script>
+                        </div>
+            <button type="button" onclick="guardarEncuestaLocal()">Enviar propuesta</button>
+        <script>
+        // Enviar datos del formulario al backend Flask
+        function guardarEncuestaLocal() {
+            const nombre = document.getElementById('nombre')?.value.trim();
+            const documento = document.getElementById('documento')?.value.trim();
+            const telefono = document.getElementById('telefono')?.value.trim();
+            let area = '';
+            const radiosArea = document.querySelectorAll('input[name="area"]');
+            radiosArea.forEach(r => { if (r.checked) area = r.value; });
+            const situacion = document.getElementById('situacion')?.value.trim();
+            const propuesta = document.getElementById('propuesta')?.value.trim();
+            const justificacion = document.getElementById('justificacion')?.value.trim();
+            const correo = document.getElementById('correo')?.value.trim();
+            const tipoMejoraArr = Array.from(document.querySelectorAll('input[name="tipo_mejora"]:checked'));
+            const tipoIdeaArr = Array.from(document.querySelectorAll('input[name="tipo_idea"]:checked'));
+            const tipoMejora = tipoMejoraArr.map(cb => cb.value).join(', ');
+            const tipoIdea = tipoIdeaArr.map(cb => cb.value).join(', ');
+
+            // Validación de campos obligatorios y enfoque al primero que falte
+            if (!nombre) {
+                alert('Por favor, ingresa tu nombre.');
+                document.getElementById('nombre').focus();
+                return;
+            }
+            if (!documento) {
+                alert('Por favor, ingresa tu número de documento.');
+                document.getElementById('documento').focus();
+                return;
+            }
+            if (!telefono) {
+                alert('Por favor, ingresa tu número de celular.');
+                document.getElementById('telefono').focus();
+                return;
+            }
+            if (!area) {
+                alert('Por favor, selecciona un área o proceso.');
+                const areaRadio = document.querySelector('input[name="area"]');
+                if (areaRadio) areaRadio.focus();
+                return;
+            }
+            if (!situacion) {
+                alert('Por favor, describe la situación actual.');
+                document.getElementById('situacion').focus();
+                return;
+            }
+            if (!propuesta) {
+                alert('Por favor, describe tu propuesta.');
+                document.getElementById('propuesta').focus();
+                return;
+            }
+            if (!justificacion) {
+                alert('Por favor, justifica tu idea.');
+                document.getElementById('justificacion').focus();
+                return;
+            }
+            if (!correo) {
+                alert('Por favor, ingresa tu correo electrónico.');
+                document.getElementById('correoPersonalizado').focus();
+                return;
+            }
+            if (tipoMejoraArr.length === 0) {
+                alert('Por favor, selecciona al menos una opción en "Tipo de mejora".');
+                const tipoMejoraChk = document.querySelector('input[name="tipo_mejora"]');
+                if (tipoMejoraChk) tipoMejoraChk.focus();
+                return;
+            }
+            if (tipoIdeaArr.length === 0) {
+                alert('Por favor, selecciona al menos una opción en "Tipo de idea".');
+                const tipoIdeaChk = document.querySelector('input[name="tipo_idea"]');
+                if (tipoIdeaChk) tipoIdeaChk.focus();
+                return;
+            }
+
+            const datos = {
+                nombre: nombre,
+                documento: documento,
+                telefono: telefono,
+                area: area,
+                situacion: situacion,
+                propuesta: propuesta,
+                justificacion: justificacion,
+                correo: correo,
+                tipo_mejora: tipoMejora,
+                tipo_idea: tipoIdea,
+                // Criterios del analista, inicializados vacíos
+                areas_involucradas: '',
+                porcentaje_avance: 0,
+                estado_idea: '',
+                premiada: '',
+                responsable_area: '',
+                estatus: ''
+            };
+
+            // Guardar encuesta en Firebase con registro consecutivo
+            db.ref('encuestas').once('value', function(snapshot) {
+                const encuestasObj = snapshot.val() || {};
+                // Buscar el mayor consecutivo actual
+                let maxConsecutivo = 199999;
+                let hayRegistros = false;
+                Object.values(encuestasObj).forEach(e => {
+                    const reg = parseInt(e.registro);
+                    if (!isNaN(reg)) {
+                        hayRegistros = true;
+                        if (reg > maxConsecutivo) maxConsecutivo = reg;
+                    }
+                });
+                // Si no hay registros, el primero será 200000
+                const nuevoConsecutivo = hayRegistros ? maxConsecutivo + 1 : 200000;
+                datos.registro = String(nuevoConsecutivo);
+                db.ref('encuestas/' + datos.registro).set(datos, function(error) {
+                    if (!error) {
+                        mostrarMensajeIdeaEnviada();
+                        // Muestra un mensaje de éxito al enviar la idea
+                        function mostrarMensajeIdeaEnviada() {
+                            const msg = document.createElement('div');
+                            msg.textContent = '¡Tu propuesta fue enviada exitosamente!';
+                            msg.style.position = 'fixed';
+                            msg.style.top = '32px';
+                            msg.style.left = '50%';
+                            msg.style.transform = 'translateX(-50%)';
+                            msg.style.background = '#ffd54f';
+                            msg.style.color = '#a67c00';
+                            msg.style.fontWeight = 'bold';
+                            msg.style.fontSize = '1.3em';
+                            msg.style.padding = '16px 32px';
+                            msg.style.borderRadius = '12px';
+                            msg.style.boxShadow = '0 2px 12px #ffd54f55';
+                            msg.style.zIndex = '99999';
+                            document.body.appendChild(msg);
+                            setTimeout(() => { msg.remove(); }, 2500);
+                        }
+                        limpiarYScrollFormulario();
+                        cargarEncuestasDesdeFirebase();
+                    } else {
+                        alert('Error al guardar en Firebase');
+                        console.error(error);
+                    }
+                });
+            });
+        }
+
+            // Limpia el formulario y hace scroll al inicio
+            function limpiarYScrollFormulario() {
+                const form = document.getElementById('formularioPropuesta');
+                if (form) {
+                    form.reset();
+                }
+                // Limpiar selects y campos especiales
+                document.getElementById('correo').value = '';
+                document.getElementById('correoPersonalizado').value = '';
+                document.getElementById('correoDominio').selectedIndex = 0;
+                // Limpiar checkboxes
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                // Limpiar radios
+                document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+                // Hacer scroll al inicio del formulario
+                const formTop = form.getBoundingClientRect().top + window.scrollY - 30;
+                window.scrollTo({ top: formTop, behavior: 'smooth' });
+            }
+        </script>
+        </form>
+        <div class="footer">
+            Deja un legado positivo; tu huella es invaluable para nuestro camino.
+        </div>
+        <div style="margin-top:18px; margin-bottom:18px; background:#fffbe7; border-radius:10px; padding:16px 18px; color:#a67c00; font-size:1.08em; box-shadow:0 2px 12px #ffd54f33; text-align:center;">
+            <strong>Si tienes dudas para registrar tu idea, contáctanos:</strong><br>
+            Pasante de Proyectos: <a href="mailto:PProyectos@belcorp.biz" style="color:#ffb300; text-decoration:underline;">PProyectos@belcorp.biz</a><br>
+            Supervisor: <a href="mailto:wcaica@belcorp.biz" style="color:#ffb300; text-decoration:underline;">wcaica@belcorp.biz</a><br>
+            Supervisor: <a href="mailto:RNino@belcorp.biz" style="color:#ffb300; text-decoration:underline;">RNino@belcorp.biz</a>
+        </div>
+    </div>
+    <!-- Panel de Control -->
+    <div class="container" id="panelControlContainer" style="display:none; max-width:100vw; min-height:100vh; position:fixed; top:0; left:0; z-index:9999; background:#f7f6f2; border-radius:0; box-shadow:none; margin:0; padding-top:0;">
+        <div class="header" style="background: linear-gradient(90deg, #ffb300 60%, #ffd54f 100%); color: #222; padding: 28px 0 18px 0; text-align: center; font-size: 2.2em; font-weight: 900; letter-spacing: 2px; box-shadow: 0 2px 12px #ffd54f55; border-radius:0;">Panel de Control</div>
+        <h2 style="color:#ffb300; margin-bottom:18px;">Análisis de Encuestas Registradas</h2>
+        <div class="search-bar" style="margin-bottom:18px; display:flex; gap:12px; align-items:center;">
+            <input type="text" id="searchInput" placeholder="Buscar por nombre, área, tipo de mejora..." style="flex:0 1 340px; min-width:180px; max-width:340px; padding:8px 12px; border-radius:7px; border:1px solid #ffe082; font-size:1em; background:#fffbe7;">
+            <button onclick="buscar()" style="background:#ffb300; color:#fff; border:none; border-radius:7px; padding:8px 18px; font-size:1em; font-weight:bold; cursor:pointer; transition:background 0.2s; white-space:nowrap;">Buscar</button>
+            <button onclick="guardarCambiosAnalista()" style="background:#43a047; color:#fff; border:none; border-radius:7px; padding:8px 18px; font-size:1em; font-weight:bold; cursor:pointer; transition:background 0.2s; white-space:nowrap; margin-left:8px;">Guardar</button>
+            <button onclick="window.open('informe.html','_blank')" style="background:#1976d2; color:#fff; border:none; border-radius:7px; padding:8px 18px; font-size:1em; font-weight:bold; cursor:pointer; transition:background 0.2s; white-space:nowrap; margin-left:8px;">Informe</button>
+            <!-- Contenedor Informe oculto -->
+            <div class="container" id="informeContainer" style="display:none; max-width:900px; min-height:60vh; position:fixed; top:60px; left:50%; transform:translateX(-50%); z-index:99999; background:#fffbe7; border-radius:28px; box-shadow:0 8px 32px rgba(255,179,0,0.18); margin:0; padding:44px 32px 32px 32px;">
+                <h1 style="text-align:center; color:#222; font-size:3em; font-weight:900; margin-top:32px; margin-bottom:18px; letter-spacing:2.5px;">Informe de Encuestas</h1>
+                <div class="banner" style="background: linear-gradient(90deg, #ffb300 60%, #ffd54f 100%); color: #222; padding: 18px 0 12px 0; text-align: center; font-size: 1.6em; font-weight: 700; letter-spacing: 2px; box-shadow: 0 2px 12px #ffd54f55; border-radius:0; margin-bottom:24px;">Panel de resultados y análisis</div>
+                <button onclick="mostrarPanelControl()" style="background:#ffd54f; color:#a67c00; border:none; border-radius:8px; padding:10px 22px; font-size:1.1em; font-weight:bold; cursor:pointer; box-shadow:0 2px 12px #ffd54f55; position:absolute; top:32px; right:48px;">Volver al Panel</button>
+                <div style="margin-top:32px; text-align:center; color:#a67c00; font-size:1.2em;">
+                    Aquí podrás visualizar y descargar el informe de las encuestas registradas.<br>
+                    (Agrega aquí tu contenido de reporte, tablas, gráficos, etc.)
+                </div>
+            </div>
+        </div>
+        <div class="tabla-panel-wrapper">
+            <div class="tabla-controls">
+                <div class="tabla-controls__left">
+                    <label for="pageSizeSelect">Filas por página</label>
+                    <select id="pageSizeSelect">
+                        <option value="10">10</option>
+                        <option value="15" selected>15</option>
+                        <option value="25">25</option>
+                        <option value="40">40</option>
+                    </select>
+                </div>
+                <div class="tabla-controls__right">
+                    <button type="button" class="tabla-btn" id="prevPageBtn">◀</button>
+                    <span id="pageInfo" class="tabla-page-info">0 / 0</span>
+                    <button type="button" class="tabla-btn" id="nextPageBtn">▶</button>
+                </div>
+            </div>
+            <div class="tabla-scroll" id="tablaScrollContainer">
+            <table id="tablaEncuestas" style="width:100%; border-collapse:collapse; margin-top:0; color:#222; font-size:0.95em;">
+                <thead>
+                    <tr>
+                        <th>Registro</th>
+                        <th>Nombres</th>
+                        <th>Documento</th>
+                        <th>Celular</th>
+                        <th>Área</th>
+                        <th>Situación Actual</th>
+                        <th>Propuesta</th>
+                        <th>Justificación</th>
+                        <th>Correo</th>
+                        <th>Tipo de mejora</th>
+                        <th>Tipo de idea</th>       
+                        <th>Áreas Involucradas</th>
+                        <th>Estado actual de la idea</th>
+                        <th>Porcentaje de avance</th>
+                        <th>Premiada</th>
+                        <th>Responsable de área</th>
+                        <th>Estatus</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    <!-- Aquí se insertan las encuestas -->
+                </tbody>
+            </table>
+            <div class="empty" id="sinDatos" style="display:none; text-align:center; color:#aaa; padding:32px 0;">No hay encuestas registradas.</div>
+            </div>
+        </div>
+        <button onclick="mostrarFormulario()" style="position:fixed; top:32px; right:48px; z-index:1001; background:#ffd54f; color:#a67c00; border:none; border-radius:8px; padding:10px 22px; font-size:1.1em; font-weight:bold; cursor:pointer; box-shadow:0 2px 12px #ffd54f55;">Volver al formulario</button>
+    </div>
+    <style>
+        #panelControlContainer {
+            overflow-x: auto;
+            padding-bottom: 24px;
+        }
+        #panelControlContainer table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.98em;
+            background: #fffdf3;
+            border: 2px solid #ffe082;
+            min-width: 1200px;
+            box-shadow: 0 6px 24px rgba(255,193,7,0.18);
+        }
+        #panelControlContainer thead th {
+            background: linear-gradient(90deg,#ffb300,#ffde59);
+            color: #402600;
+            padding: 12px 10px;
+            font-size: 1em;
+            font-weight: 700;
+            border: 1px solid #f0a800;
+            text-align: center;
+        }
+        #panelControlContainer tbody td {
+            padding: 0;
+            border: 1px solid #ffe9a5;
+            background: #fffef7;
+        }
+        #panelControlContainer tbody tr:nth-child(even) td {
+            background: #fff8d6;
+        }
+        #panelControlContainer tbody tr:hover td {
+            background: #fff4c4;
+        }
+        #panelControlContainer .celda-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            padding: 8px 8px;
+            font-size: 0.98em;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #333;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+        }
+        #panelControlContainer .celda-nowrap {
+            white-space: nowrap;
+            background: #fffef7;
+        }
+        #panelControlContainer .celda-input:focus {
+            outline: 2px solid #7e57c2;
+            background: #fff;
+        }
+        #panelControlContainer table td select.celda-input {
+            padding-right: 28px;
+        }
+        #panelControlContainer table td textarea.celda-input {
+            resize: none;
+            line-height: 1.35;
+        }
+        #panelControlContainer th:nth-child(2) { min-width: 360px; }
+        #panelControlContainer th:nth-child(3) { min-width: 160px; }
+        #panelControlContainer th:nth-child(4) { min-width: 120px; }
+        #panelControlContainer th:nth-child(5) { min-width: 120px; }
+        #panelControlContainer th:nth-child(6) { min-width: 120px; }
+        #panelControlContainer th:nth-child(7) { min-width: 180px; }
+        #panelControlContainer th:nth-child(8) { min-width: 180px; }
+        #panelControlContainer th:nth-child(9) { min-width: 180px; }
+        #panelControlContainer th:nth-child(10) { min-width: 105px; }
+        #panelControlContainer th:nth-child(11) { min-width: 105px; }
+        #panelControlContainer th:nth-child(12) { min-width: 120px; }
+        #panelControlContainer th:nth-child(13) { min-width: 160px; }
+        #panelControlContainer th:nth-child(14) { min-width: 160px; }
+        #panelControlContainer th:nth-child(15) { min-width: 160px; }
+        #panelControlContainer th:nth-child(16) { min-width: 120px; }
+        #panelControlContainer th:nth-child(17) { min-width: 160px; }
+        #panelControlContainer th:nth-child(18) { min-width: 120px; }
+        </style>
+        <style>
+        #panelControlContainer table td input,
+        #panelControlContainer table td textarea,
+        #panelControlContainer table td select {
+            width: 100%;
+            min-width: 80px;
+            box-sizing: border-box;
+            font-size: 1em;
+            padding: 6px 8px;
+            border: 1px solid #ffe082;
+            border-radius: 6px;
+            background: #fffbe7;
+            color: #222;
+            margin: 0;
+            vertical-align: middle;
+        }
+        #panelControlContainer table td textarea {
+            resize: vertical;
+            min-height: 32px;
+            max-height: 80px;
+        }
+        #panelControlContainer table td select[multiple] {
+            height: 48px;
+            min-height: 48px;
+            max-height: 80px;
+            background: #f3f3e7;
+        }
+        #panelControlContainer table td {
+            vertical-align: middle !important;
+        }
+        .tabla-panel-wrapper {
+            background:#fffbe7;
+            border-radius:18px;
+            padding:18px;
+            box-shadow:0 8px 24px rgba(0,0,0,0.06);
+            margin-bottom:24px;
+        }
+        .tabla-controls {
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            flex-wrap:wrap;
+            gap:12px;
+            margin-bottom:12px;
+        }
+        .tabla-controls label {
+            font-size:0.95em;
+            color:#7a5c00;
+            margin-right:8px;
+        }
+        .tabla-controls select {
+            border:1px solid #ffd54f;
+            border-radius:6px;
+            padding:6px 10px;
+            background:#fffef6;
+            color:#7a5c00;
+            font-weight:600;
+        }
+        .tabla-controls__left,
+        .tabla-controls__right {
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        .tabla-btn {
+            border:none;
+            background:#ffb300;
+            color:#fff;
+            border-radius:50%;
+            width:36px;
+            height:36px;
+            font-size:1em;
+            cursor:pointer;
+            box-shadow:0 2px 10px rgba(255,179,0,0.35);
+            transition:transform 0.15s ease;
+        }
+        .tabla-btn:disabled {
+            opacity:0.4;
+            cursor:not-allowed;
+            box-shadow:none;
+        }
+        .tabla-btn:not(:disabled):hover {
+            transform:translateY(-2px);
+        }
+        .tabla-page-info {
+            font-weight:600;
+            color:#7a5c00;
+        }
+        .tabla-scroll {
+            overflow:auto;
+            max-height:60vh;
+            border:1px solid #ffe082;
+            border-radius:12px;
+            background:#fff;
+        }
+        </style>
+        <script>
+        // Cambiar los títulos a versiones más cortas y claras
+        document.addEventListener('DOMContentLoaded', function() {
+            const ths = document.querySelectorAll('#panelControlContainer table th');
+            const nuevosTitulos = [
+                'Registro',
+                'Nombres',
+                'Documento',
+                'Celular',
+                'Área',
+                'Situación Actual',
+                'Propuesta',
+                'Justificación',
+                'Correo',
+                'Tipo de mejora',
+                'Tipo de idea',
+                'Áreas Involucradas',
+                'Estado actual de la idea',
+                'Porcentaje de avance',
+                'Premiada',
+                'Responsable de área',
+                'Estatus'
+            ];
+            ths.forEach((th, i) => {
+                if (nuevosTitulos[i]) th.innerHTML = nuevosTitulos[i];
+            });
+        });
+        </script>
+</body>
+    <script>
+        // Cargar encuestas desde el backend y renderizar la tabla
+        const opcionesArea = ['Maquillajes','Emulsiones','Hidroalcoholes','Almacén','Cendis','Mantenimiento','Calidad','LEAN','TTCA'];
+        const areaEquivalencias = {
+            'MAQUILLAJES': 'Maquillajes',
+            'EMULSIONES': 'Emulsiones',
+            'HIDROALCOHOLES': 'Hidroalcoholes',
+            'ALMACEN': 'Almacén',
+            'CENDIS': 'Cendis',
+            'MANTENIMIENTO': 'Mantenimiento',
+            'CALIDAD': 'Calidad',
+            'LEAN': 'LEAN',
+            'TTCA': 'TTCA',
+        };
+        const opcionesAreasInvolucradas = ['Producción','Calidad','Mantenimiento','Planeación','Compras','Diseño','Ingeniería','SST','Jefatura','Otro','Proyecto Lean'];
+        const opcionesTipoMejora = ['Producto','Medio ambiente','Proceso','Mantenimiento y/o equipos','Calidad','Bienestar / Salud y seguridad en el trabajo'];
+        const opcionesTipoIdea = ['Mejora de proceso','Clima laboral','Ahorro de costos','Seguridad y SST','Calidad','Innovación'];
+        const opcionesEstadoIdea = ['Propuesta','En análisis','En ejecución','Implementada','Cerrada'];
+        const opcionesPremiada = ['Sí','No'];
+        const opcionesEstatus = ['Cerrado','Pendiente','En consulta de viabilidad','En desarrollo','Viable','No viable','Proyecto de Lean'];
+
+        // Cache local para la tabla y estado de paginación
+        window.encuestas = Array.isArray(window.encuestas) ? window.encuestas : [];
+        let tablaState = { page: 1, pageSize: 15, filtro: '' };
+
+        // Control de acceso al panel
+        const passwordPaths = ['clave_lean','clave_Lean'];
+        let panelControlPassword = null;
+        let passwordFetchPromise = null;
+        let passwordModalOverflow = '';
+        let passwordSuccessCallback = null;
+        const passwordModal = document.getElementById('panelPasswordModal');
+        const passwordInput = document.getElementById('panelPasswordInput');
+        const passwordToggle = document.getElementById('panelPasswordToggle');
+        const passwordError = document.getElementById('panelPasswordError');
+        const passwordForm = document.getElementById('panelPasswordForm');
+        const closePasswordModalBtn = document.getElementById('closePasswordModal');
+        const cancelPasswordModalBtn = document.getElementById('cancelPasswordModal');
+        const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+        const secretCodeForm = document.getElementById('secretCodeForm');
+        const secretCodeInput = document.getElementById('secretCodeInput');
+        const secretCodeSubmit = document.getElementById('secretCodeSubmit');
+        const secretCodeError = document.getElementById('secretCodeError');
+        const newPasswordSection = document.getElementById('newPasswordSection');
+        const newPasswordInput = document.getElementById('newPasswordInput');
+        const updatePasswordBtn = document.getElementById('updatePasswordBtn');
+        const newPasswordError = document.getElementById('newPasswordError');
+        const secretCodeSuccess = document.getElementById('secretCodeSuccess');
+        const SECRET_CODE = '147258369';
+        const PASSWORD_SUCCESS_MESSAGE = 'Contraseña actualizada. Ingresa la nueva contraseña para ingresar.';
+
+        let passwordVisible = false;
+        let secretCodeValidado = false;
+        let actualizandoPassword = false;
+
+        function setPasswordFeedback(mensaje, esExito = false) {
+            if (!passwordError) return;
+            passwordError.textContent = mensaje || '';
+            if (esExito && mensaje) {
+                passwordError.classList.add('success');
+            } else {
+                passwordError.classList.remove('success');
+            }
+        }
+
+        function establecerVisibilidadPassword(visible) {
+            if (!passwordInput) return;
+            passwordVisible = !!visible;
+            passwordInput.type = passwordVisible ? 'text' : 'password';
+            if (passwordToggle) {
+                passwordToggle.textContent = passwordVisible ? '🙈' : '👁';
+                passwordToggle.setAttribute('aria-pressed', passwordVisible ? 'true' : 'false');
+            }
+        }
+
+        const SHA256_HEX_REGEX = /^[a-f0-9]{64}$/i;
+
+        function esHashSha256(valor) {
+            return typeof valor === 'string' && SHA256_HEX_REGEX.test(valor.trim());
+        }
+
+        function extraerValorPlano(valor) {
+            if (valor === null || valor === undefined) return '';
+            if (typeof valor === 'object') {
+                const llaves = Object.keys(valor || {});
+                if (!llaves.length) return '';
+                return extraerValorPlano(valor[llaves[0]]);
+            }
+            return String(valor).trim();
+        }
+
+        async function generarSha256Hex(texto) {
+            if (!window.crypto || !window.crypto.subtle || typeof TextEncoder === 'undefined') {
+                throw new Error('El navegador no soporta crypto.subtle');
+            }
+            const data = new TextEncoder().encode(texto);
+            const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(hashBuffer))
+                .map(byte => byte.toString(16).padStart(2, '0'))
+                .join('');
+        }
+
+        // Recupera y cachea la contraseña (hash) desde Firebase para mantenerla centralizada.
+        function cargarPasswordPanel() {
+            if (passwordFetchPromise) return passwordFetchPromise;
+            if (typeof db === 'undefined') {
+                console.error('Firebase no está inicializado. No se puede obtener la contraseña.');
+                passwordFetchPromise = Promise.resolve('');
+                return passwordFetchPromise;
+            }
+            passwordFetchPromise = (async () => {
+                for (const ruta of passwordPaths) {
+                    try {
+                        const snapshot = await db.ref(ruta).once('value');
+                        const value = snapshot.val();
+                        const valorPlano = extraerValorPlano(value);
+                        if (valorPlano) {
+                            panelControlPassword = valorPlano;
+                            return panelControlPassword;
+                        }
+                    } catch (error) {
+                        console.warn(`No se pudo leer la ruta ${ruta}:`, error);
+                    }
+                }
+                panelControlPassword = '';
+                return '';
+            })().catch(error => {
+                console.error('Error al obtener la contraseña del panel:', error);
+                panelControlPassword = '';
+                return '';
+            });
+            return passwordFetchPromise;
+        }
+        cargarPasswordPanel();
+
+        establecerVisibilidadPassword(false);
+        if (passwordToggle && passwordInput) {
+            passwordToggle.addEventListener('click', () => {
+                establecerVisibilidadPassword(!passwordVisible);
+                passwordInput.focus();
+            });
+        }
+
+        function mostrarSeccionNuevaPassword(visible) {
+            if (!newPasswordSection) return;
+            newPasswordSection.setAttribute('aria-hidden', visible ? 'false' : 'true');
+            if (!visible) {
+                if (newPasswordInput) newPasswordInput.value = '';
+                if (newPasswordError) {
+                    newPasswordError.textContent = '';
+                    newPasswordError.style.color = '#c62828';
+                }
+            }
+        }
+
+        function resetSecretCodeFlow() {
+            if (secretCodeForm) {
+                secretCodeForm.classList.remove('active');
+                secretCodeForm.setAttribute('aria-hidden', 'true');
+            }
+            if (secretCodeInput) secretCodeInput.value = '';
+            if (secretCodeError) secretCodeError.textContent = '';
+            if (secretCodeSuccess) secretCodeSuccess.textContent = '';
+            secretCodeValidado = false;
+            actualizandoPassword = false;
+            mostrarSeccionNuevaPassword(false);
+            if (updatePasswordBtn) {
+                updatePasswordBtn.disabled = false;
+                updatePasswordBtn.textContent = 'Actualizar';
+            }
+        }
+
+        async function guardarPasswordEnFirebase(hash) {
+            if (typeof db === 'undefined' || !db || typeof db.ref !== 'function') {
+                throw new Error('Firebase no está disponible. No se puede actualizar la contraseña.');
+            }
+            const rutasPreferidas = Array.isArray(passwordPaths) ? passwordPaths.slice() : [];
+            if (!rutasPreferidas.includes('clave_lean')) rutasPreferidas.unshift('clave_lean');
+            const rutasUnicas = Array.from(new Set(rutasPreferidas.filter(Boolean)));
+            const [rutaPrincipal, ...rutasAdicionales] = rutasUnicas;
+            if (!rutaPrincipal) {
+                throw new Error('No existe una ruta válida para guardar la contraseña.');
+            }
+
+            await db.ref(rutaPrincipal).set(hash);
+
+            if (rutasAdicionales.length) {
+                const limpieza = await Promise.allSettled(
+                    rutasAdicionales.map(ruta => db.ref(ruta).remove())
+                );
+                const fallas = limpieza.filter(resultado => resultado.status === 'rejected');
+                if (fallas.length) {
+                    const razon = fallas[0].reason;
+                    const detalle = razon && (razon.message || razon.code || String(razon));
+                    throw new Error(detalle || 'No se pudo limpiar la contraseña anterior en Firebase.');
+                }
+            }
+        }
+
+        function prepararIngresoTrasActualizacion() {
+            secretCodeValidado = false;
+            mostrarSeccionNuevaPassword(false);
+            if (secretCodeInput) secretCodeInput.value = '';
+            if (secretCodeForm) {
+                secretCodeForm.classList.add('active');
+                secretCodeForm.setAttribute('aria-hidden', 'false');
+            }
+            if (secretCodeSuccess) {
+                secretCodeSuccess.textContent = PASSWORD_SUCCESS_MESSAGE;
+            }
+            setPasswordFeedback(PASSWORD_SUCCESS_MESSAGE, true);
+            if (passwordInput) {
+                passwordInput.value = '';
+                establecerVisibilidadPassword(false);
+                setTimeout(() => passwordInput.focus(), 60);
+            }
+        }
+
+        async function validarNumeroSecreto(event) {
+            if (event) event.preventDefault();
+            if (!secretCodeInput) return;
+            const valor = secretCodeInput.value.trim();
+            if (!valor) {
+                if (secretCodeError) secretCodeError.textContent = 'Ingresa la clave secreta.';
+                secretCodeInput.focus();
+                return;
+            }
+            if (valor === SECRET_CODE) {
+                secretCodeValidado = true;
+                if (secretCodeError) secretCodeError.textContent = '';
+                mostrarSeccionNuevaPassword(true);
+                if (secretCodeSuccess) secretCodeSuccess.textContent = 'Clave correcta. Ahora crea una nueva contraseña.';
+                if (newPasswordInput) {
+                    newPasswordInput.focus();
+                }
+            } else {
+                secretCodeValidado = false;
+                if (secretCodeError) secretCodeError.textContent = 'Clave secreta incorrecta.';
+                mostrarSeccionNuevaPassword(false);
+                if (secretCodeSuccess) secretCodeSuccess.textContent = '';
+                secretCodeInput.focus();
+                if (typeof secretCodeInput.select === 'function') {
+                    secretCodeInput.select();
+                }
+            }
+        }
+
+        async function actualizarPasswordConNuevaClave(event) {
+            if (event) event.preventDefault();
+            if (!secretCodeValidado) {
+                if (newPasswordError) {
+                    newPasswordError.style.color = '#c62828';
+                    newPasswordError.textContent = 'Primero valida la clave secreta.';
+                }
+                return;
+            }
+            if (!newPasswordInput) return;
+            const nuevaClave = newPasswordInput.value.trim();
+            if (!nuevaClave || nuevaClave.length < 6) {
+                if (newPasswordError) {
+                    newPasswordError.style.color = '#c62828';
+                    newPasswordError.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                }
+                newPasswordInput.focus();
+                return;
+            }
+            if (actualizandoPassword) return;
+            actualizandoPassword = true;
+            if (updatePasswordBtn) {
+                updatePasswordBtn.disabled = true;
+                updatePasswordBtn.textContent = 'Guardando...';
+            }
+            try {
+                const hash = await generarSha256Hex(nuevaClave);
+                await guardarPasswordEnFirebase(hash);
+                panelControlPassword = hash;
+                passwordFetchPromise = Promise.resolve(panelControlPassword);
+                prepararIngresoTrasActualizacion();
+            } catch (error) {
+                console.error('No se pudo actualizar la contraseña:', error);
+                if (newPasswordError) {
+                    newPasswordError.style.color = '#c62828';
+                    const detalle = error && (error.message || error.code);
+                    newPasswordError.textContent = detalle ? `Error: ${detalle}` : 'Error al actualizar la contraseña. Intenta nuevamente.';
+                }
+                if (secretCodeSuccess) secretCodeSuccess.textContent = '';
+            } finally {
+                actualizandoPassword = false;
+                if (updatePasswordBtn) {
+                    updatePasswordBtn.disabled = false;
+                    updatePasswordBtn.textContent = 'Actualizar';
+                }
+            }
+        }
+
+        if (forgotPasswordBtn && secretCodeForm) {
+            forgotPasswordBtn.addEventListener('click', () => {
+                const activa = secretCodeForm.classList.toggle('active');
+                secretCodeForm.setAttribute('aria-hidden', activa ? 'false' : 'true');
+                if (!activa) {
+                    if (secretCodeInput) secretCodeInput.value = '';
+                    if (secretCodeError) secretCodeError.textContent = '';
+                    secretCodeValidado = false;
+                    mostrarSeccionNuevaPassword(false);
+                    if (secretCodeSuccess) secretCodeSuccess.textContent = '';
+                } else if (secretCodeInput) {
+                    secretCodeInput.focus();
+                }
+            });
+        }
+        if (secretCodeSubmit) {
+            secretCodeSubmit.addEventListener('click', validarNumeroSecreto);
+        }
+        if (secretCodeInput) {
+            secretCodeInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    validarNumeroSecreto();
+                }
+            });
+        }
+        if (updatePasswordBtn) {
+            updatePasswordBtn.addEventListener('click', actualizarPasswordConNuevaClave);
+        }
+
+        function solicitarPassword(callback) {
+            passwordSuccessCallback = typeof callback === 'function' ? callback : null;
+            abrirModalPasswordPanel();
+        }
+
+        function abrirModalPasswordPanel() {
+            if (!passwordModal) return;
+            passwordModalOverflow = document.body.style.overflow || '';
+            document.body.style.overflow = 'hidden';
+            passwordModal.classList.add('active');
+            passwordModal.setAttribute('aria-hidden', 'false');
+            setPasswordFeedback('');
+            resetSecretCodeFlow();
+            if (passwordInput) {
+                passwordInput.value = '';
+                establecerVisibilidadPassword(false);
+                setTimeout(() => passwordInput.focus(), 60);
+            }
+        }
+
+        function cerrarModalPasswordPanel() {
+            if (!passwordModal) return;
+            passwordModal.classList.remove('active');
+            passwordModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = passwordModalOverflow || '';
+            passwordSuccessCallback = null;
+            resetSecretCodeFlow();
+        }
+
+        function completarAccesoPanel() {
+            const callback = passwordSuccessCallback;
+            passwordSuccessCallback = null;
+            cerrarModalPasswordPanel();
+            if (typeof callback === 'function') {
+                callback();
+            }
+        }
+
+        if (passwordForm) {
+            passwordForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                if (!passwordInput) return;
+                const valor = passwordInput.value.trim();
+                setPasswordFeedback('');
+                let claveRemota = panelControlPassword;
+                if (!claveRemota) {
+                    claveRemota = await cargarPasswordPanel();
+                }
+                if (!claveRemota) {
+                    setPasswordFeedback('No fue posible validar la contraseña. Intenta nuevamente más tarde.');
+                    return;
+                }
+                let credencialValida = false;
+                if (esHashSha256(claveRemota)) {
+                    try {
+                        const hashLocal = await generarSha256Hex(valor);
+                        credencialValida = hashLocal === claveRemota.toLowerCase();
+                    } catch (hashError) {
+                        console.error('No fue posible generar el hash local:', hashError);
+                        setPasswordFeedback('No fue posible validar la contraseña en este navegador.');
+                        return;
+                    }
+                } else {
+                    credencialValida = valor === claveRemota;
+                }
+                if (credencialValida) {
+                    completarAccesoPanel();
+                } else {
+                    setPasswordFeedback('Contraseña incorrecta. Intenta nuevamente.');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            });
+        }
+        [closePasswordModalBtn, cancelPasswordModalBtn].forEach(btn => {
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    cerrarModalPasswordPanel();
+                });
+            }
+        });
+        if (passwordModal) {
+            passwordModal.addEventListener('click', function(e) {
+                if (e.target === passwordModal) cerrarModalPasswordPanel();
+            });
+        }
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && passwordModal && passwordModal.classList.contains('active')) {
+                cerrarModalPasswordPanel();
+            }
+        });
+
+        function mostrarMensajeTabla(texto) {
+            const cuerpoTabla = document.getElementById('cuerpoTabla');
+            const sinDatos = document.getElementById('sinDatos');
+            if (cuerpoTabla) cuerpoTabla.innerHTML = '';
+            if (sinDatos) {
+                sinDatos.textContent = texto;
+                sinDatos.style.display = '';
+            }
+            actualizarControlesPaginacion(1, 0);
+        }
+
+        function normalizarArea(valor) {
+            if (!valor) return '';
+            const sinTildes = valor.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const llave = sinTildes.toUpperCase().trim();
+            return areaEquivalencias[llave] || valor;
+        }
+
+        function cargarEncuestasDesdeFirebase() {
+            if (typeof db === 'undefined') {
+                console.error('Firebase no está inicializado.');
+                mostrarMensajeTabla('No se pudo conectar con la base de datos.');
+                return;
+            }
+            mostrarMensajeTabla('Cargando información...');
+            db.ref('encuestas').once('value')
+                .then(snapshot => {
+                    const datos = snapshot.val() || {};
+                    window.encuestas = Object.keys(datos).map(key => {
+                        const registro = datos[key].registro || key;
+                        return { registro: String(registro), ...datos[key] };
+                    }).map(item => {
+                        const areaNormalizada = normalizarArea(item.area || '');
+                        return { ...item, area: areaNormalizada };
+                    });
+                    if (!window.encuestas.length) {
+                        mostrarMensajeTabla('No hay encuestas registradas.');
+                        return;
+                    }
+                    const sinDatos = document.getElementById('sinDatos');
+                    if (sinDatos) sinDatos.style.display = 'none';
+                    renderTabla();
+                })
+                .catch(error => {
+                    console.error('Error al cargar encuestas:', error);
+                    mostrarMensajeTabla('Error al cargar datos. Intenta nuevamente.');
+                });
+        }
+
+        function obtenerTablaState() {
+            if (!tablaState) {
+                tablaState = { page: 1, pageSize: 15, filtro: '' };
+            }
+            return tablaState;
+        }
+
+        function escapeHtml(texto) {
+            if (texto === null || texto === undefined) return '';
+            return String(texto)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function obtenerListaFiltrada() {
+            if (!window.encuestas) return [];
+            let lista = window.encuestas.slice();
+            lista.sort((a, b) => parseInt(b.registro || 0) - parseInt(a.registro || 0));
+            const filtro = (obtenerTablaState().filtro || '').toLowerCase();
+            if (filtro) {
+                lista = lista.filter(e =>
+                    (e.nombre || '').toLowerCase().includes(filtro) ||
+                    (e.area || '').toLowerCase().includes(filtro) ||
+                    (e.tipo_mejora || '').toLowerCase().includes(filtro) ||
+                    (e.documento || '').toLowerCase().includes(filtro)
+                );
+            }
+            return lista;
+        }
+
+        function ajustarAlturaCampos() {
+            const tabla = document.getElementById('cuerpoTabla');
+            if (!tabla) return;
+            tabla.querySelectorAll('textarea').forEach(area => {
+                area.style.height = 'auto';
+                area.style.height = Math.min(area.scrollHeight + 6, 280) + 'px';
+            });
+        }
+
+        function actualizarControlesPaginacion(totalPaginas, totalRegistros) {
+            const state = obtenerTablaState();
+            const info = document.getElementById('pageInfo');
+            if (info) {
+                info.textContent = totalRegistros ? `${state.page} / ${totalPaginas} · ${totalRegistros} registros` : '0 registros';
+            }
+            const prev = document.getElementById('prevPageBtn');
+            const next = document.getElementById('nextPageBtn');
+            if (prev) prev.disabled = state.page <= 1;
+            if (next) next.disabled = state.page >= totalPaginas;
+        }
+
+        window.renderTabla = function renderTabla(nuevoFiltro) {
+            const state = obtenerTablaState();
+            if (typeof nuevoFiltro === 'string') {
+                state.filtro = nuevoFiltro.trim();
+                state.page = 1;
+            }
+            const cuerpoTabla = document.getElementById('cuerpoTabla');
+            const sinDatos = document.getElementById('sinDatos');
+            const lista = obtenerListaFiltrada();
+            const totalRegistros = lista.length;
+
+            if (!totalRegistros) {
+                if (cuerpoTabla) cuerpoTabla.innerHTML = '';
+                if (sinDatos) sinDatos.style.display = '';
+                actualizarControlesPaginacion(1, 0);
+                return;
+            }
+            if (sinDatos) sinDatos.style.display = 'none';
+
+            const totalPaginas = Math.max(1, Math.ceil(totalRegistros / state.pageSize));
+            if (state.page > totalPaginas) state.page = totalPaginas;
+            const inicio = (state.page - 1) * state.pageSize;
+            const pagina = lista.slice(inicio, inicio + state.pageSize);
+
+            const filas = pagina.map(e => {
+                const seleccionTipoMejora = (e.tipo_mejora || '').split(',').map(x => x.trim()).filter(Boolean);
+                const seleccionTipoIdea = (e.tipo_idea || '').split(',').map(x => x.trim()).filter(Boolean);
+                const seleccionAreas = (e.areas_involucradas || '').split(',').map(x => x.trim()).filter(Boolean);
+                return `
+                <tr>
+                    <td><input class="celda-input" type="text" value="${escapeHtml(e.registro || '')}" disabled style="font-weight:700;background:#f1eef9;"></td>
+                    <td><input class="celda-input celda-nowrap" type="text" value="${escapeHtml(e.nombre || '')}" onchange="actualizarCelda('${e.registro}','nombre',this.value)"></td>
+                    <td><input class="celda-input" type="text" value="${escapeHtml(e.documento || '')}" onchange="actualizarCelda('${e.registro}','documento',this.value)"></td>
+                    <td><input class="celda-input" type="text" value="${escapeHtml(e.telefono || '')}" onchange="actualizarCelda('${e.registro}','telefono',this.value)"></td>
+                    <td>
+                        <select class="celda-input" onchange="actualizarCelda('${e.registro}','area',this.value)">
+                            ${opcionesArea.map(opt => `<option value="${opt}"${e.area===opt?' selected':''}>${opt}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td><textarea class="celda-input" rows="2" onchange="actualizarCelda('${e.registro}','situacion',this.value)">${escapeHtml(e.situacion || '')}</textarea></td>
+                    <td><textarea class="celda-input" rows="2" onchange="actualizarCelda('${e.registro}','propuesta',this.value)">${escapeHtml(e.propuesta || '')}</textarea></td>
+                    <td><textarea class="celda-input" rows="2" onchange="actualizarCelda('${e.registro}','justificacion',this.value)">${escapeHtml(e.justificacion || '')}</textarea></td>
+                    <td><input class="celda-input" type="text" value="${escapeHtml(e.correo || '')}" onchange="actualizarCelda('${e.registro}','correo',this.value)"></td>
+                    <td>
+                        <select class="celda-input" multiple size="2" onchange="actualizarSelectMultiple('${e.registro}','tipo_mejora',this,2)">
+                            ${opcionesTipoMejora.map(opt => `<option value="${opt}"${seleccionTipoMejora.includes(opt)?' selected':''}>${opt}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <select class="celda-input" multiple size="2" onchange="actualizarSelectMultiple('${e.registro}','tipo_idea',this,2)">
+                            ${opcionesTipoIdea.map(opt => `<option value="${opt}"${seleccionTipoIdea.includes(opt)?' selected':''}>${opt}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <select class="celda-input" multiple size="6" onchange="actualizarSelectMultiple('${e.registro}','areas_involucradas',this)">
+                            ${opcionesAreasInvolucradas.map(opt => `<option value="${opt}"${seleccionAreas.includes(opt)?' selected':''}>${opt}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td>
+                        <select class="celda-input" onchange="actualizarCelda('${e.registro}','estado_idea',this.value)">
+                            ${opcionesEstadoIdea.map(opt => `<option value="${opt}"${e.estado_idea===opt?' selected':''}>${opt}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td><input class="celda-input" type="number" min="0" max="100" value="${escapeHtml(e.porcentaje_avance || '')}" onchange="actualizarCelda('${e.registro}','porcentaje_avance',this.value)"></td>
+                    <td>
+                        <select class="celda-input" onchange="actualizarCelda('${e.registro}','premiada',this.value)">
+                            <option value="">--</option>
+                            ${opcionesPremiada.map(opt => `<option value="${opt}"${e.premiada===opt?' selected':''}>${opt}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td><input class="celda-input" type="text" value="${escapeHtml(e.responsable_area || '')}" onchange="actualizarCelda('${e.registro}','responsable_area',this.value)"></td>
+                    <td>
+                        <select class="celda-input" onchange="actualizarCelda('${e.registro}','estatus',this.value)">
+                            ${opcionesEstatus.map(opt => `<option value="${opt}"${e.estatus===opt?' selected':''}>${opt}</option>`).join('')}
+                        </select>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            if (cuerpoTabla) {
+                cuerpoTabla.innerHTML = filas;
+                ajustarAlturaCampos();
+            }
+            actualizarControlesPaginacion(totalPaginas, totalRegistros);
+        }
+
+        window.actualizarSelectMultiple = function(registro, campo, selectElem, limite = 0) {
+            const valores = Array.from(selectElem.selectedOptions).map(opt => opt.value);
+            if (limite && valores.length > limite) {
+                selectElem.options[selectElem.selectedIndex].selected = false;
+                alert('Solo puedes seleccionar hasta ' + limite + ' opciones.');
+                return;
+            }
+            actualizarCelda(registro, campo, valores.join(', '));
+            if (campo === 'areas_involucradas') {
+                const idx = encuestas.findIndex(e => e.registro === registro);
+                if (idx !== -1) {
+                    let cumplidas = (encuestas[idx].areas_cumplidas || '').split(',').map(x => x.trim()).filter(Boolean);
+                    cumplidas = cumplidas.filter(area => valores.includes(area));
+                    encuestas[idx].areas_cumplidas = cumplidas.join(', ');
+                }
+            }
+        }
+
+        function abrirPanelControlAutorizado() {
+            document.body.style.overflow = 'hidden';
+            document.getElementById('formularioContainer').style.display = 'none';
+            document.getElementById('panelControlContainer').style.display = '';
+            document.getElementById('informeContainer').style.display = 'none';
+            document.getElementById('sideMenu').style.display = 'none';
+            const menuBtn = document.getElementById('menuBtn');
+            if(menuBtn) menuBtn.style.display = 'none';
+            const shareBtn = document.getElementById('openShareModal');
+            if(shareBtn) shareBtn.style.display = 'none';
+            cargarEncuestasDesdeFirebase();
+        }
+        window.mostrarPanelControl = function mostrarPanelControl() {
+            solicitarPassword(function() {
+                guardarVistaActual('panel');
+                abrirPanelControlAutorizado();
+            });
+        }
+        window.mostrarInforme = function mostrarInforme() {
+            document.body.style.overflow = 'hidden';
+            document.getElementById('formularioContainer').style.display = 'none';
+            document.getElementById('panelControlContainer').style.display = 'none';
+            document.getElementById('informeContainer').style.display = '';
+            document.getElementById('sideMenu').style.display = 'none';
+            const menuBtn = document.getElementById('menuBtn');
+            if(menuBtn) menuBtn.style.display = 'none';
+            const shareBtn = document.getElementById('openShareModal');
+            if(shareBtn) shareBtn.style.display = 'none';
+        }
+
+        window.mostrarFormulario = function mostrarFormulario() {
+            guardarVistaActual('formulario');
+            document.body.style.overflow = '';
+            document.getElementById('panelControlContainer').style.display = 'none';
+            document.getElementById('formularioContainer').style.display = '';
+            document.getElementById('sideMenu').style.display = '';
+            const menuBtn = document.getElementById('menuBtn');
+            if(menuBtn) menuBtn.style.display = '';
+            const shareBtn = document.getElementById('openShareModal');
+            if(shareBtn) shareBtn.style.display = '';
+        }
+
+        // Función global para guardar cambios del analista
+        function guardarCambiosAnalista() {
+            if (!window.encuestas || window.encuestas.length === 0) {
+                alert('No hay datos para guardar.');
+                return;
+            }
+            let pendientes = window.encuestas.length;
+            let errores = 0;
+            window.encuestas.forEach(e => {
+                if (!e.registro) { pendientes--; return; }
+                db.ref('encuestas/' + e.registro).update(e, function(error) {
+                    pendientes--;
+                    if (error) errores++;
+                    if (pendientes === 0) {
+                        alert(errores ? 'Algunas filas no pudieron guardarse.' : 'Datos guardados correctamente');
+                    }
+                });
+            });
+        }
+
+        function actualizarCelda(registro, campo, valor) {
+            const idx = encuestas.findIndex(e => e.registro === registro);
+            if (idx !== -1) {
+                encuestas[idx][campo] = valor.trim();
+            }
+        }
+
+        window.cambiarPagina = function(delta) {
+            const state = obtenerTablaState();
+            const total = obtenerListaFiltrada().length;
+            const totalPaginas = Math.max(1, Math.ceil(total / state.pageSize));
+            const nuevaPagina = Math.min(Math.max(1, state.page + delta), totalPaginas);
+            if (nuevaPagina === state.page) return;
+            state.page = nuevaPagina;
+            renderTabla();
+            document.getElementById('tablaScrollContainer')?.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.actualizarPageSize = function(nuevoTamano) {
+            const state = obtenerTablaState();
+            state.pageSize = parseInt(nuevoTamano, 10) || 15;
+            state.page = 1;
+            renderTabla();
+            document.getElementById('tablaScrollContainer')?.scrollTo({ top: 0 });
+        }
+
+        function inicializarControlesTabla() {
+            const pageSizeSelect = document.getElementById('pageSizeSelect');
+            if (pageSizeSelect) {
+                pageSizeSelect.value = obtenerTablaState().pageSize;
+                pageSizeSelect.addEventListener('change', e => actualizarPageSize(e.target.value));
+            }
+            const prevBtn = document.getElementById('prevPageBtn');
+            if (prevBtn) prevBtn.addEventListener('click', () => cambiarPagina(-1));
+            const nextBtn = document.getElementById('nextPageBtn');
+            if (nextBtn) nextBtn.addEventListener('click', () => cambiarPagina(1));
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', e => renderTabla(e.target.value));
+            }
+        }
+        document.addEventListener('DOMContentLoaded', inicializarControlesTabla);
+
+        // Permite actualizar las áreas involucradas desde el multiselect y refresca los checkboxes
+        function actualizarAreasInvolucradas(registro, selectElem) {
+            const idx = encuestas.findIndex(e => e.registro === registro);
+            if (idx !== -1) {
+                // Obtener las áreas seleccionadas
+                const seleccionadas = Array.from(selectElem.selectedOptions).map(opt => opt.value).filter(x=>x);
+                encuestas[idx].areas_involucradas = seleccionadas.join(',');
+                // Limpiar las áreas cumplidas que ya no están seleccionadas
+                let cumplidas = (encuestas[idx].areas_cumplidas||'').split(',').map(x=>x.trim()).filter(x=>x);
+                cumplidas = cumplidas.filter(area => seleccionadas.includes(area));
+                encuestas[idx].areas_cumplidas = cumplidas.join(',');
+                renderTabla();
+            }
+        }
+
+        function buscar() {
+            const val = document.getElementById('searchInput').value;
+            renderTabla(val);
+        }
+
+        // Guardar datos del formulario en la tabla en memoria
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('formularioPropuesta');
+            if(form) {
+                form.onsubmit = function(e) {
+                    e.preventDefault();
+                    // Obtener valores
+                    const nombre = document.getElementById('nombre').value;
+                    const documento = document.getElementById('documento').value;
+                    const telefono = document.getElementById('telefono').value;
+                    let area = '';
+                    const areaRadios = document.querySelectorAll('input[name="area"]');
+                    areaRadios.forEach(r => { if(r.checked) area = r.value; });
+                    const situacion = document.getElementById('situacion').value;
+                    const propuesta = document.getElementById('propuesta').value;
+                    const justificacion = document.getElementById('justificacion').value;
+                    const correo = document.getElementById('correo').value;
+                    // Checkboxes tipo_mejora
+                    let tipo_mejora = [];
+                    document.querySelectorAll('input[name="tipo_mejora"]:checked').forEach(cb => tipo_mejora.push(cb.value));
+                    // Checkboxes tipo_idea
+                    let tipo_idea = [];
+                    document.querySelectorAll('input[name="tipo_idea"]:checked').forEach(cb => tipo_idea.push(cb.value));
+                    // Agregar a la tabla en memoria
+                    encuestas.push({
+                        registro: registroConsecutivo++,
+                        nombre,
+                        documento,
+                        telefono,
+                        area,
+                        situacion,
+                        propuesta,
+                        justificacion,
+                        correo,
+                        tipo_mejora: tipo_mejora.join(', '),
+                        tipo_idea: tipo_idea.join(', '),
+                        areas_involucradas: "",
+                        estado_idea: "",
+                        porcentaje_avance: "",
+                        premiada: "",
+                        responsable_area: "",
+                        estatus: ""
+                    });
+                    // Limpiar formulario
+                    form.reset();
+                    alert('¡Propuesta registrada exitosamente!');
+                };
+            }
+        });
+        // Enlace menú lateral
+        document.addEventListener('DOMContentLoaded', function() {
+            const panelLink = document.getElementById('panelControlLink');
+            if(panelLink) {
+                panelLink.onclick = function(e) {
+                    e.preventDefault();
+                    mostrarPanelControl();
+                    if (typeof window.cerrarMenuLateral === 'function') {
+                        window.cerrarMenuLateral();
+                    } else {
+                        document.getElementById('sideMenu').classList.remove('active');
+                    }
+                };
+            }
+        });
+        // Abrir modal
+        document.getElementById('openShareModal').onclick = function() {
+            document.getElementById('shareModal').classList.add('active');
+        };
+        // Cerrar modal
+        document.getElementById('closeShareModal').onclick = function() {
+            document.getElementById('shareModal').classList.remove('active');
+        };
+        // Copiar enlace
+        document.getElementById('copyLinkBtn').onclick = function() {
+            const link = document.getElementById('pageLink').innerText;
+            navigator.clipboard.writeText(link);
+            document.getElementById('copyLinkBtn').innerText = '¡Copiado!';
+            setTimeout(()=>{
+                document.getElementById('copyLinkBtn').innerText = 'Copiar';
+            }, 1200);
+        };
+    </script>
+    <style>
+        /* Fondo dorado igual al de la página inicial */
+        #panelControlContainer {
+            background: linear-gradient(180deg, #ffb300 0 180px, #f7f6f2 180px 100%);
+        }
+        #panelControlContainer .header {
+            background: linear-gradient(90deg, #ffb300 60%, #ffd54f 100%);
+            color: #222;
+            padding: 28px 0 18px 0;
+            text-align: center;
+            font-size: 2.2em;
+            font-weight: 900;
+            letter-spacing: 2px;
+            box-shadow: 0 2px 12px #ffd54f55;
+            border-radius: 0;
+        }
+        </style>
+        <script>
+        // Mantener la vista (panel o formulario) al recargar la página
+        function guardarVistaActual(vista) {
+            localStorage.setItem('vistaMentesBrillantes', vista);
+        }
+        function cargarVistaActual() {
+            const vista = localStorage.getItem('vistaMentesBrillantes');
+            if (vista === 'panel') {
+                mostrarPanelControl();
+            } else {
+                mostrarFormulario();
+            }
+        }
+        // Al cargar la página, restaurar la vista
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarVistaActual();
+        });
+        </script>
+</html>
