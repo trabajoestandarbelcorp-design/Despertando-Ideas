@@ -88,12 +88,12 @@
             position: absolute;
             top: 16px;
             right: 16px;
-            background: #2563eb;
+            background: #10b981;
             color: #fff;
             z-index: 7;
         }
         .btn-export:hover {
-            background: #1d4ed8;
+            background: #059669;
             transform: translateY(-1px);
         }
         .btn-informe {
@@ -831,14 +831,34 @@ const promises = [];
                     conteo[proc][tipo]++;
                 });
             });
+
+            // Cálculo de totales por tipo e total global
+            const totalesPorTipo = {};
+            tiposIdea.forEach(tipo => totalesPorTipo[tipo] = 0);
+            let totalGeneral = 0;
+            Object.keys(conteo).forEach(proc => {
+                tiposIdea.forEach(tipo => {
+                    const valor = conteo[proc][tipo] || 0;
+                    totalesPorTipo[tipo] += valor;
+                    totalGeneral += valor;
+                });
+            });
+
             // Render tabla
-            let html = '<table><thead><tr><th>Proceso</th>' + tiposIdea.map(t=>`<th>${escapeHtml(t)}</th>`).join('') + '</tr></thead><tbody>';
+            let html = '<table><thead><tr><th>Proceso</th>' + tiposIdea.map(t=>`<th>${escapeHtml(t)}</th>`).join('') + '<th>Total</th></tr></thead><tbody>';
             const totalPorProceso = proc => tiposIdea.reduce((acc, tipo) => acc + (conteo[proc]?.[tipo] || 0), 0);
             const procesosOrdenados = procesosRender.slice().sort((a, b) => totalPorProceso(b) - totalPorProceso(a));
             procesosOrdenados.forEach(proc => {
-                html += `<tr><td>${escapeHtml(proc)}</td>` + tiposIdea.map(tipo => `<td>${conteo[proc][tipo] || 0}</td>`).join('') + '</tr>';
+                const procTotal = totalPorProceso(proc);
+                html += `<tr><td>${escapeHtml(proc)}</td>` + tiposIdea.map(tipo => {
+                    const valor = conteo[proc][tipo] || 0;
+                    const clases = valor > 0 ? ' style="background: #c7d2fe; font-weight:700;"' : '';
+                    return `<td${clases}>${valor}</td>`;
+                }).join('') + `<td style="font-weight:700;">${procTotal}</td></tr>`;
             });
-            html += '</tbody></table>';
+            html += '</tbody><tfoot><tr style="background:#e0e7ff; font-weight:700; color:#1e3a8a; border-top:2px solid #6366f1;">';
+            html += '<td>Total</td>' + tiposIdea.map(tipo => `<td>${totalesPorTipo[tipo]}</td>`).join('') + `<td>${totalGeneral}</td>`;
+            html += '</tr></tfoot></table>';
             document.getElementById('tablaIdeas').innerHTML = html;
             // Gráfico eliminado; la tabla mantiene el orden por volumen.
         }
