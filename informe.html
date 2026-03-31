@@ -10,33 +10,35 @@
             min-height: 100vh;
             margin: 0;
             padding: 0;
-            font-family: 'Montserrat', Arial, sans-serif;
-            color: #222;
-            background: linear-gradient(180deg, #ffb300 0 180px, #fffbe7 180px 100%);
+            font-family: 'Segoe UI', 'Montserrat', Arial, sans-serif;
+            color: #1f2937;
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
         }
         .container {
-            max-width: 1100px;
-            margin: 48px auto 32px auto;
-            background: rgba(255,255,255,0.99);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(255,179,0,0.18);
-            padding: 44px 32px 32px 32px;
+            max-width: 1220px;
+            margin: 42px auto 30px auto;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.5), 0 1.5px 0 rgba(99, 102, 241, 0.33);
+            padding: 30px 28px 26px 28px;
             position: relative;
+            overflow: hidden;
         }
         .header {
             text-align: center;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
             position: relative;
         }
         .header h1 {
+            text-align: center;
             font-size: 2.8em;
             margin: 0 0 8px 0;
             letter-spacing: 2.5px;
             font-family: 'Montserrat', Arial, sans-serif;
             font-weight: 900;
-            color: #111;
+            color: #1e3a8a;
             background: none;
-            text-shadow: 0 2px 8px #ffd54f44;
+            text-shadow: 0 2px 10px rgba(124, 58, 237, 0.28);
             position: relative;
         }
         .header h1::after {
@@ -46,57 +48,94 @@
             width: 60%;
             height: 4px;
             border-radius: 4px;
-            background: linear-gradient(90deg, #ffd700 0%, #ffb300 50%, #ffd700 100%);
-            box-shadow: 0 2px 12px #ffd70099;
+            background: linear-gradient(90deg, #7c3aed 0%, #60a5fa 100%);
+            box-shadow: 0 2px 12px rgba(124, 58, 237, 0.45);
             opacity: 1;
         }
         .banner {
-            background: linear-gradient(90deg, #ffb300 60%, #ffd54f 100%);
-            color: #222;
-            font-weight: bold;
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            color: #fff;
+            font-weight: 900;
             text-align: center;
             border-radius: 10px;
-            padding: 14px 0 12px 0;
-            margin-bottom: 28px;
-            font-size: 1.25em;
-            letter-spacing: 1.2px;
-            box-shadow: 0 2px 8px rgba(255,179,0,0.13);
-            text-shadow: 1px 1px 0 #fffbe7, 0 2px 8px #0002;
+            padding: 12px 0 12px 0;
+            margin-bottom: 22px;
+            font-size: 1.2em;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
         }
-        .btn-volver {
-            background: #ffd54f;
-            color: #a67c00;
+        .btn-volver, .btn-export {
+            background: #6366f1;
+            color: #fff;
             border: none;
             border-radius: 8px;
             padding: 10px 22px;
             font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 12px #ffd54f55;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+            transition: background 0.2s, transform 0.2s;
+        }
+        .btn-volver {
             position: absolute;
-            top: 32px;
-            right: 48px;
-            transition: background 0.2s, color 0.2s;
+            top: 16px;
+            right: 150px;
+            background: #4f46e5;
+            color: #fff;
+            z-index: 7;
+        }
+        .btn-export {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #2563eb;
+            color: #fff;
+            z-index: 7;
+        }
+        .btn-export:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+        .btn-informe {
+            background: #8b5cf6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 22px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 12px rgba(124, 58, 237, 0.36);
+            position: absolute;
+            top: 16px;
+            right: 320px;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .btn-informe:hover {
+            background: #6d28d9;
+            transform: translateY(-1px);
         }
         .btn-volver:hover {
-            background: #ffb300;
+            background: #6366f1;
             color: #fff;
+            transform: translateY(-1px);
         }
         h2 {
-            color: #1976d2;
+            color: #1e3a8a;
             margin-top: 38px;
             margin-bottom: 12px;
             font-size: 1.45em;
             letter-spacing: 1px;
         }
         .resumen {
-            background: #fffbe7;
+            background: #f5f3ff;
+            border: 1px solid #d8b4fe;
             border-radius: 10px;
             padding: 18px;
             margin-bottom: 24px;
-            color: #a67c00;
+            color: #3730a3;
             font-size: 1.13em;
-            box-shadow: 0 2px 8px #ffd54f33;
+            box-shadow: inset 0 0 8px rgba(124, 58, 237, 0.15);
         }
         .overview-grid {
             display: grid;
@@ -105,47 +144,47 @@
             margin-bottom: 28px;
         }
         .overview-card {
-            background: #fffbe7;
+            background: #fff;
             border-radius: 12px;
             padding: 18px 20px;
-            box-shadow: 0 4px 12px rgba(255, 179, 0, 0.18);
-            border: 1px solid #ffe082;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.16);
+            border: 1px solid #e0e7ff;
         }
         .overview-card span {
             font-size: 0.95em;
-            color: #a67c00;
+            color: #3749ff;
             letter-spacing: 0.5px;
         }
         .overview-card strong {
             display: block;
             margin-top: 6px;
             font-size: 1.9em;
-            color: #1b3a57;
+            color: #1e3a8a;
         }
         .overview-card small {
             display: block;
             margin-top: 4px;
-            color: #6c5b13;
+            color: #6b46c1;
             font-size: 0.9em;
         }
         .progress-summary {
-            background: #fffbe7;
+            background: #fff;
             border-radius: 12px;
             padding: 18px 20px 22px 20px;
             margin-bottom: 32px;
-            box-shadow: 0 4px 12px rgba(255, 179, 0, 0.16);
-            border: 1px solid #ffe082;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.14);
+            border: 1px solid #e0e7ff;
         }
         .progress-summary__label {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: 600;
-            color: #1b3a57;
+            color: #1e3a8a;
             margin-bottom: 12px;
         }
         .progress-summary__label span {
-            color: #6c5b13;
+            color: #4338ca;
             font-size: 1em;
             letter-spacing: 0.8px;
         }
@@ -156,31 +195,32 @@
             width: 100%;
             height: 14px;
             border-radius: 999px;
-            background: #ffeeba;
+            background: #e0e7ff;
             overflow: hidden;
         }
         .progress-bar__fill {
             height: 100%;
             width: 0;
             border-radius: 999px;
-            background: linear-gradient(90deg, #ffd54f, #ffb300);
+            background: linear-gradient(90deg, #7c3aed, #6366f1);
             transition: width 0.4s ease;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 18px 0 32px 0;
-            background: #fffbe7;
-            border-radius: 10px;
+            background: #fff;
+            border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 2px 8px #ffd54f22;
+            table-layout: auto;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.16);
         }
         .tabla-scroll-limited {
             max-height: 420px;
             overflow-y: auto;
             border-radius: 10px;
-            border: 1px solid #ffe082;
-            box-shadow: inset 0 0 8px rgba(255, 179, 0, 0.15);
+            border: 1px solid #e0e7ff;
+            box-shadow: inset 0 0 8px rgba(99, 102, 241, 0.14);
         }
         .tabla-filtros {
             display: flex;
@@ -192,59 +232,71 @@
         .tabla-filtros select,
         .tabla-filtros input {
             border-radius: 8px;
-            border: 1px solid #ffd54f;
+            border: 1px solid #cbd5e1;
             padding: 6px 10px;
-            font-family: 'Montserrat', Arial, sans-serif;
+            font-family: 'Segoe UI', 'Montserrat', Arial, sans-serif;
             font-size: 0.95em;
-            background: #fffdf3;
+            background: #fff;
+            color: #1e293b;
         }
         .tabla-filtros button {
             border: none;
             border-radius: 8px;
             padding: 6px 16px;
-            font-weight: 600;
+            font-weight: 700;
             color: #fff;
-            background: linear-gradient(90deg,#ffb300,#ffd54f);
+            background: #2563eb;
             cursor: pointer;
-            box-shadow: 0 2px 10px rgba(255,179,0,0.25);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
         }
         .tabla-resumen {
             font-weight: 700;
-            background: #ffecb3 !important;
+            background: #dbeafe !important;
         }
         th, td {
-            border: 1px solid #ffd54f;
+            border: 1.5px solid #e0e7ff;
             padding: 10px 12px;
-            text-align: left;
-            font-size: 1em;
+            text-align: center;
+            font-size: 0.98em;
+            background: #f8fafc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         th {
-            background: #ffecb3;
-            font-weight: bold;
-            color: #a67c00;
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            color: #fff;
+            font-weight: 700;
+        }
+        tbody tr:nth-child(even) td {
+            background: rgba(224, 231, 255, 0.2);
+        }
+        tbody tr:hover td {
+            background: rgba(199, 210, 254, 0.53);
         }
         tr:nth-child(even) td {
-            background: #fff8e1;
+            background: #eff6ff;
         }
         .chart-container {
             width: 100%;
             max-width: 650px;
             margin: 0 auto 32px auto;
-            background: #fffbe7;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px #ffd54f22;
-            padding: 18px 10px 10px 10px;
+            background: #f8fafc;
+            border: 1px solid #bfdbfe;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.16);
+            padding: 18px 12px 12px 12px;
         }
         .chart-title {
             text-align: center;
-            color: #1976d2;
+            color: #3730a3;
             font-size: 1.1em;
             margin-bottom: 8px;
             font-weight: 700;
         }
         .chart-note {
             font-size: 0.9em;
-            color: #6c5b13;
+            color: #1e3a8a;
             margin: 10px 0 0 0;
             text-align: center;
         }
@@ -256,7 +308,13 @@
             <h1>Informe de Encuestas</h1>
         </div>
         <div class="banner">Panel de resultados y análisis</div>
-        <button class="btn-volver" onclick="window.location.href='MentesBrillantes.html'">Volver al Panel</button>
+        <button class="btn-volver" onclick="window.location.href='BD.html'">Volver al Panel</button>
+        <button class="btn-export" onclick="exportInformeExcel()">Exportar</button>
+        <div style="margin-top:16px; display:flex; gap:8px; align-items:center;">
+            <input id="excelUpload" type="file" accept=".xlsx,.xls" style="padding:6px; border:1px solid #ccc; border-radius:8px;" />
+            <button id="uploadExcelBtn" style="background:#2563eb; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700;">Subir Excel a Firebase</button>
+            <span id="uploadStatus" style="font-weight:600; color:#334155;"></span>
+        </div>
         <div class="resumen" style="background:#fffbe7; border-radius:10px; padding:18px; margin-bottom:24px; color:#a67c00; font-size:1.1em;">
             <b>Este informe muestra:</b><br>
             1. Número de ideas segregado por proceso y tipo de idea.<br>
@@ -277,32 +335,21 @@
         <div id="tablaIdeas"></div>
         
         <h2>2. Avance de Ideas</h2>
-        <div class="tabla-filtros">
-            <input type="text" id="filtroAvanceTexto" placeholder="Buscar por idea o proceso...">
-            <select id="filtroAvanceProceso">
-                <option value="">Todos los procesos</option>
-            </select>
-            <select id="filtroAvanceRango">
-                <option value="">Todos los avances</option>
-                <option value="0-25">0% - 25%</option>
-                <option value="26-50">26% - 50%</option>
-                <option value="51-75">51% - 75%</option>
-                <option value="76-100">76% - 100%</option>
-            </select>
-            <button onclick="resetFiltrosAvance()">Limpiar filtros</button>
+        <!-- Sección de filtros y tabla de avance eliminada según petición -->
+        <div class="chart-container">
+            <div class="chart-title">Distribución por Estado (Avance de Ideas)</div>
+            <div id="chartAvanceEstado" style="padding:14px;"></div>
         </div>
-        <div class="tabla-scroll-limited" id="tablaAvance"></div>
-        <h2>3. Status de las Ideas</h2>
+        <h2>3. Ideas por Área</h2>
         <div id="tablaStatus"></div>
         <div class="chart-container">
-            <div class="chart-title">Distribución de estatus</div>
-            <canvas id="chartStatus"></canvas>
+            <div class="chart-title">Distribución por Área</div>
+            <div id="chartStatus" style="padding:12px;"></div>
         </div>
     </div>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         // Configuración Firebase igual que en MentesBrillantes.html
         var firebaseConfig = {
@@ -318,9 +365,168 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
 
-        // Opciones fijas
-        const tiposIdea = ['Mejora de proceso','Clima laboral','Ahorro de costos','Seguridad y SST','Calidad','Innovación','Sin clasificar'];
+        function mostrarStatusUpload(mensaje, bueno) {
+            const statusEl = document.getElementById('uploadStatus');
+            if (statusEl) {
+                statusEl.textContent = mensaje;
+                statusEl.style.color = bueno ? '#0f766e' : '#b91c1c';
+            }
+        }
+
+        function normalizeKey(label) {
+            return label.toString().trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+        }
+
+        function cargarExcelAFirebase(file) {
+            if (!file) {
+                mostrarStatusUpload('Selecciona un archivo primero', false);
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+
+                    if (!rows.length) {
+                        mostrarStatusUpload('El archivo no contiene filas', false);
+                        return;
+                    }
+
+                    const updates = [];
+                    rows.forEach((row, index) => {
+                        const raw = {};
+                        Object.entries(row).forEach(([key, value]) => {
+                            raw[normalizeKey(key)] = value;
+                        });
+
+                        if (index === 0) {
+                            console.log('Primer row raw', row);
+                            console.log('Primer row raw normalizado', raw);
+                        }
+
+                        // Mapeo directo con la estructura de tu Excel
+                        const value = (keys, fallback='') => {
+                            for (const k of keys) {
+                                if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];
+                            }
+                            return fallback;
+                        };
+
+                        const parsedKey = value(['Idea N°', 'Idea N', 'IDEA N°', 'IDEA N', 'consecutivo', 'CONSECUTIVO'], '').toString().trim();
+                        let ideaKey = parsedKey ? parsedKey.padStart(5, '0') : '';
+                        if (!ideaKey) ideaKey = String(index + 1).padStart(5, '0');
+                        if (index < 5) console.log('fila', index, 'ideaKey', ideaKey, 'rawKey', parsedKey);
+
+                        const item = {
+                            consecutivo: ideaKey,
+                            nombre_idea: value(['Nombre de la idea', 'nombre de la idea', 'nombre_idea', 'Nombre Idea'], ''),
+                            nombre: value(['Nombres y apellidos', 'Nombres y Apellidos', 'nombres y apellidos', 'nombre', 'nombre_completo', 'name', 'Name'], ''),
+                            documento: value(['Numero de documento', 'numero de documento', 'documento'], ''),
+                            telefono: value(['Celular', 'celular', 'telefono'], ''),
+                            area: value(['Area', 'area', 'Área'], ''),
+                            situacion: value(['Situacion actual', 'Situación actual', 'situacion_actual', 'situacion'], ''),
+                            propuesta: value(['Propuesta', 'propuesta'], ''),
+                            justificacion: value(['Justificacion', 'Justificación', 'justificacion'], ''),
+                            correo: value(['Correo electronico', 'Correo electrónico', 'correo', 'email'], ''),
+                            tipo_mejora: value(['Tipo de mejora', 'tipo de mejora', 'tipo_mejora'], ''),
+                            tipo_idea: value(['Tipo de idea', 'tipo de idea', 'tipo_idea'], ''),
+                            estado: value(['Estado', 'estado'], ''),
+                            comentarios_lean: value(['Comentarios Lean', 'comentarios lean', 'comentarios_lean'], ''),
+                            idea_en_desarrollo: value(['Idea en desarrollo', 'idea en desarrollo', 'idea_en_desarrollo'], ''),
+                            premiacion: value(['Premiación', 'Premiacion', 'premiacion'], ''),
+                            responsable_tarea: value(['Responsable tarea', 'responsable tarea', 'responsable_tarea'], ''),
+                            fecha_revision: value(['Fecha revision', 'Fecha revisión', 'fecha_revision'], ''),
+                            fecha_fin: value(['Fecha fin', 'fecha_fin'], '')
+                        };
+
+                        const keyForNode = item.consecutivo.toString().trim();
+                        updates.push({ item, ideaKey: keyForNode });
+                    });
+
+const promises = [];
+                    updates.forEach(({ item, ideaKey }) => {
+                        if (!ideaKey) return; // ignorar filas sin Idea N° válido
+                        console.log('Guardar nodo encuestas/' + ideaKey, item);
+                        const p = db.ref('encuestas/' + ideaKey).set(item);
+                        promises.push(p);
+                    });
+
+                    Promise.all(promises)
+                        .then(() => {
+                            mostrarStatusUpload('Datos cargados correctamente', true);
+                            // refrescar vista (opcional)
+                            db.ref('encuestas').once('value', function(snapshot) {
+                                const datos = snapshot.val() || {};
+                                const encuestas = mapearEncuestasDesdeFirebase(datos);
+                                window.encuestasCache = encuestas;
+                                renderResumen(encuestas);
+                                renderIdeas(encuestas);
+                                renderAvance(encuestas);
+                                renderStatus(encuestas);
+                            });
+                        })
+                       .catch(err => mostrarStatusUpload('Error carga: ' + err.message, false));
+
+                } catch (err) {
+                    mostrarStatusUpload('Error al leer Excel: ' + err.message, false);
+                }
+            };
+            reader.onerror = (err) => {
+                mostrarStatusUpload('Error lecturas de archivo', false);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const fileInput = document.getElementById('excelUpload');
+            const uploadBtn = document.getElementById('uploadExcelBtn');
+            if (uploadBtn && fileInput) {
+                uploadBtn.addEventListener('click', () => {
+                    const file = fileInput.files[0];
+                    cargarExcelAFirebase(file);
+                });
+            }
+        });
+
+        function exportInformeExcel() {
+            const data = window.encuestasCache || [];
+            if (!data.length) {
+                alert('No hay datos para exportar');
+                return;
+            }
+            const rows = data.map(r => ({
+                'Idea N°': r.consecutivo || '',
+                'Nombre de la idea': r.nombre_idea || '',
+                'Nombres y apellidos': r.nombre || '',
+                'Número de documento': r.documento || '',
+                'Celular': r.telefono || '',
+                'Área': r.area || '',
+                'Situación actual': r.situacion || '',
+                'Propuesta': r.propuesta || '',
+                'Justificación': r.justificacion || '',
+                'Correo electrónico': r.correo || '',
+                'Tipo de mejora': r.tipo_mejora || '',
+                'Tipo de idea': r.tipo_idea || '',
+                'Estado': r.estado || '',
+                'Comentarios Lean': r.comentarios_lean || '',
+                'Idea en desarrollo': r.idea_en_desarrollo || '',
+                'Premiación': r.premiacion || '',
+                'Responsable tarea': r.responsable_tarea || '',
+                'Fecha revisión': r.fecha_revision || '',
+                'Fecha fin': r.fecha_fin || ''
+            }));
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(rows);
+            XLSX.utils.book_append_sheet(wb, ws, 'Informe');
+            XLSX.writeFile(wb, 'Informe_Encuestas_' + new Date().toISOString().slice(0,10) + '.xlsx');
+        }
+
         const procesos = ['Maquillajes','Emulsiones','Hidroalcoholes','Almacén','Cendis','Mantenimiento','Calidad','LEAN','TTCA'];
+        const tiposIdea = ['Mejora de proceso','Clima laboral','Ahorro de costos','Seguridad y SST','Calidad','Innovación','Sin clasificar'];
         const statusList = ['Cerrado','Pendiente','En consulta de viabilidad','En desarrollo','Viable','No viable','Proyecto de Lean'];
         const statusEquivalencias = {
             'CERRADO': 'Cerrado',
@@ -417,18 +623,44 @@
             return statusEquivalencias[llave] || (valor ? valor.trim() : '');
         }
 
+        function normalizarIdeaDesarrollo(valor) {
+            if (!valor) return '';
+            const trimmed = valor.toString().trim().toUpperCase();
+            if (trimmed.includes('DESARROLLO') || trimmed.includes('FEED BACK') || trimmed.includes('IMPLEMENTADA')) {
+                return 'EN DESARROLLO';
+            }
+            return trimmed;
+        }
+
+        function normalizarPremiacion(valor) {
+            if (!valor) return '';
+            const trimmed = valor.toString().trim().toUpperCase();
+            if (trimmed.includes('PREMIADA') || trimmed.includes('PREMIACION')) {
+                return 'PREMIADA';
+            }
+            if (trimmed.includes('PENDIENTE')) {
+                return 'PENDIENTE';
+            }
+            return trimmed;
+        }
+
         function obtenerTiposDesdeMejora(cadena) {
             if (!cadena) return [];
-            return cadena
-                .split(/[;,]/)
+            const items = Array.isArray(cadena) ? cadena : cadena.toString().split(/[;,]/);
+            return items
                 .map(item => tipoMejoraEquivalencias[normalizarBase(item)] || '')
                 .filter(Boolean);
         }
 
         function obtenerTiposIdea(cadena, fallbackMejora) {
             let lista = [];
-            if (cadena) {
+            if (Array.isArray(cadena)) {
                 lista = cadena
+                    .map(item => normalizarTipoIdea(item))
+                    .filter(Boolean);
+            } else if (cadena) {
+                lista = cadena
+                    .toString()
                     .split(/[;,]/)
                     .map(item => normalizarTipoIdea(item))
                     .filter(Boolean);
@@ -446,10 +678,15 @@
             if (!rawData) return [];
             return Object.keys(rawData).map(key => {
                 const item = rawData[key] || {};
-                const tiposNormalizados = obtenerTiposIdea(item.tipo_idea, item.tipo_mejora);
+                const areaRaw = item.area || item.Area || item.area_real || item.area_ || '';
+                const statusRaw = item.estado || item.Estado || item.estatus || item.Estatus || '';
+                const tipoIdeaRaw = item.tipo_idea || item.tipoIdea || item.TipoIdea || item.tipo_mejora || '';
+                const tiposNormalizados = obtenerTiposIdea(tipoIdeaRaw, item.tipo_mejora);
                 return {
                     ...item,
-                    area: normalizarArea(item.area),
+                    area: normalizarArea(areaRaw),
+                    estado: statusRaw || item.estado || item.Estado || item.estatus || item.Estatus || '',
+                    tipo_idea: tipoIdeaRaw,
                     tipoIdeaLista: tiposNormalizados
                 };
             }).sort((a,b) => {
@@ -468,14 +705,29 @@
         function renderResumen(encuestas) {
             const totalIdeas = encuestas.length;
             const promedio = obtenerPromedioAvance(encuestas);
-            let cerradas = 0, pendientes = 0, enDesarrollo = 0, viables = 0;
+            let cerradas = 0, pendientes = 0, estadoEnDesarrollo = 0, viables = 0;
+            let ideaEnDesarrolloCount = 0;
+            let premiadas = 0, pendientesPremiacion = 0;
+
             encuestas.forEach(enc => {
-                const status = normalizarStatus(enc.estatus);
+                const statusValue = enc.estado || enc.estatus || enc.Estado || enc.Estatus || '';
+                const status = normalizarStatus(statusValue);
+                const avanceStatus = normalizarIdeaDesarrollo(enc.idea_en_desarrollo || enc.ideaEnDesarrollo || '');
+                const premiacionStatus = normalizarPremiacion(enc.premiacion || enc.Premio || enc.premio || '');
+
                 if (status === 'Cerrado') cerradas++;
                 if (status === 'Pendiente') pendientes++;
-                if (status === 'En desarrollo') enDesarrollo++;
+                if (status === 'En desarrollo') estadoEnDesarrollo++;
                 if (status === 'Viable') viables++;
+
+                if (avanceStatus === 'EN DESARROLLO') ideaEnDesarrolloCount++;
+
+                if (premiacionStatus === 'PREMIADA') premiadas++;
+                if (premiacionStatus === 'PENDIENTE') pendientesPremiacion++;
             });
+
+            const porcentajeEnDesarrollo = totalIdeas ? Math.round((ideaEnDesarrolloCount / totalIdeas) * 100) : 0;
+
             const container = document.getElementById('resumenIndicadores');
             if (container) {
                 container.innerHTML = `
@@ -485,30 +737,40 @@
                         <small>Encuestas capturadas</small>
                     </div>
                     <div class="overview-card">
+                        <span>Avance general (idea en desarrollo)</span>
+                        <strong>${porcentajeEnDesarrollo}%</strong>
+                        <small>${ideaEnDesarrolloCount}/${totalIdeas} en desarrollo</small>
+                    </div>
+                    <div class="overview-card">
                         <span>Ideas cerradas</span>
                         <strong>${cerradas}</strong>
-                        <small>Marcadas como cerradas</small>
+                        <small>Estado 'Cerrado'</small>
                     </div>
                     <div class="overview-card">
-                        <span>Ideas en desarrollo</span>
-                        <strong>${enDesarrollo}</strong>
-                        <small>En ejecución activa</small>
+                        <span>Ideas en estado desarrollo</span>
+                        <strong>${estadoEnDesarrollo}</strong>
+                        <small>Estado 'En desarrollo'</small>
                     </div>
                     <div class="overview-card">
-                        <span>Ideas pendientes</span>
+                        <span>Ideas en estado pendiente</span>
                         <strong>${pendientes}</strong>
-                        <small>En espera de revisión</small>
+                        <small>Estado 'Pendiente'</small>
                     </div>
                     <div class="overview-card">
-                        <span>Ideas viables</span>
-                        <strong>${viables}</strong>
-                        <small>Evaluadas como viables</small>
+                        <span>Ideas premiadas</span>
+                        <strong>${premiadas}</strong>
+                        <small>Premiación 'Premiada'</small>
+                    </div>
+                    <div class="overview-card">
+                        <span>Premiación pendiente</span>
+                        <strong>${pendientesPremiacion}</strong>
+                        <small>Premiación 'Pendiente'</small>
                     </div>`;
             }
             const avanceNumero = document.getElementById('avanceGeneralNumero');
             const avanceBar = document.getElementById('avanceGeneralBar');
-            if (avanceNumero) avanceNumero.textContent = `${promedio}%`;
-            if (avanceBar) avanceBar.style.width = `${Math.min(Math.max(promedio, 0), 100)}%`;
+            if (avanceNumero) avanceNumero.textContent = `${porcentajeEnDesarrollo}%`;
+            if (avanceBar) avanceBar.style.width = `${Math.min(Math.max(porcentajeEnDesarrollo, 0), 100)}%`;
 
             const procesosSelect = document.getElementById('filtroAvanceProceso');
             if (procesosSelect) {
@@ -520,10 +782,11 @@
         // Leer encuestas y procesar
         db.ref('encuestas').once('value', function(snapshot) {
             const datos = snapshot.val() || {};
+            console.log('Firebase datos raw encuestas:', datos);
             const encuestas = mapearEncuestasDesdeFirebase(datos);
+            console.log('encuestas mapeadas:', encuestas);
             window.encuestasCache = encuestas;
-                renderResumen(encuestas);
-            inicializarFiltrosAvance(encuestas);
+            renderResumen(encuestas);
             renderIdeas(encuestas);
             renderAvance(encuestas);
             renderStatus(encuestas);
@@ -551,7 +814,8 @@
                 });
             });
             encuestas.forEach(e => {
-                const proc = e.area || '';
+                const areaRaw = e.area || e.Area || '';
+                const proc = areaRaw.toString().trim();
                 if (!proc) return;
                 if (!conteo[proc]) {
                     conteo[proc] = {};
@@ -559,7 +823,7 @@
                 }
                 const tipos = (Array.isArray(e.tipoIdeaLista) && e.tipoIdeaLista.length)
                     ? e.tipoIdeaLista
-                    : obtenerTiposIdea(e.tipo_idea, e.tipo_mejora);
+                    : obtenerTiposIdea(e.tipo_idea || e.tipoIdea || e.TipoIdea || e.tipo_mejora, e.tipo_mejora);
                 tipos.forEach(tipo => {
                     if (conteo[proc][tipo] === undefined) {
                         conteo[proc][tipo] = 0;
@@ -586,136 +850,79 @@
             rango: ''
         };
 
-        function obtenerAvanceFiltrado(encuestas) {
-            return encuestas.filter(e => {
-                const texto = (filtrosAvance.texto || '').toLowerCase();
-                const proceso = filtrosAvance.proceso;
-                const rango = filtrosAvance.rango;
-                const avance = parseInt(e.porcentaje_avance) || 0;
-                const coincideTexto = !texto || (e.propuesta || '').toLowerCase().includes(texto) || (e.area || '').toLowerCase().includes(texto);
-                const coincideProceso = !proceso || e.area === proceso;
-                let coincideRango = true;
-                if (rango) {
-                    const [min, max] = rango.split('-').map(Number);
-                    coincideRango = avance >= min && avance <= max;
-                }
-                return coincideTexto && coincideProceso && coincideRango;
-            });
-        }
 
-        function inicializarFiltrosAvance(encuestas) {
-            const textoInput = document.getElementById('filtroAvanceTexto');
-            const procesoSelect = document.getElementById('filtroAvanceProceso');
-            const rangoSelect = document.getElementById('filtroAvanceRango');
-            if (textoInput) {
-                textoInput.addEventListener('input', e => {
-                    filtrosAvance.texto = e.target.value;
-                    renderAvance(encuestas);
-                });
-            }
-            if (procesoSelect) {
-                procesoSelect.addEventListener('change', e => {
-                    filtrosAvance.proceso = e.target.value;
-                    renderAvance(encuestas);
-                });
-            }
-            if (rangoSelect) {
-                rangoSelect.addEventListener('change', e => {
-                    filtrosAvance.rango = e.target.value;
-                    renderAvance(encuestas);
-                });
-            }
-        }
-
-        window.resetFiltrosAvance = function resetFiltrosAvance() {
-            filtrosAvance = { texto: '', proceso: '', rango: '' };
-            const textoInput = document.getElementById('filtroAvanceTexto');
-            const procesoSelect = document.getElementById('filtroAvanceProceso');
-            const rangoSelect = document.getElementById('filtroAvanceRango');
-            if (textoInput) textoInput.value = '';
-            if (procesoSelect) procesoSelect.value = '';
-            if (rangoSelect) rangoSelect.value = '';
-            if (window.encuestasCache) {
-                renderAvance(window.encuestasCache);
-            }
-        };
 
         function renderAvance(encuestas) {
-            const filtradas = obtenerAvanceFiltrado(encuestas);
-            let html = '<table><thead><tr><th>Idea</th><th>Proceso</th><th>Tipo</th><th>Avance (%)</th></tr></thead><tbody>';
-            filtradas.forEach(e => {
-                const avance = parseInt(e.porcentaje_avance) || 0;
-                html += `<tr>
-                    <td>${escapeHtml(e.propuesta || '-')}</td>
-                    <td>${escapeHtml(e.area || '-')}</td>
-                    <td>${escapeHtml(e.tipo_idea || '-')}</td>
-                    <td>${avance}%</td>
-                </tr>`;
-            });
-            const promedio = obtenerPromedioAvance(encuestas);
-            html += `</tbody><tfoot><tr class="tabla-resumen"><td colspan="3">Promedio general</td><td>${promedio}%</td></tr></tfoot></table>`;
-            document.getElementById('tablaAvance').innerHTML = html;
-        }
+            const conteoEstado = {};
+            statusList.forEach(status => conteoEstado[status] = 0);
 
-        // 3. Status de las ideas
-        function renderStatus(encuestas) {
-            let conteo = {};
-            statusList.forEach(s=>conteo[s]=0);
             encuestas.forEach(e => {
-                const status = normalizarStatus(e.estatus);
-                if (status && conteo[status] !== undefined) {
-                    conteo[status]++;
-                } else if (status) {
-                    conteo.Otros = (conteo.Otros || 0) + 1;
+                const status = normalizarStatus(e.estado || e.estatus);
+                if (status) {
+                    if (conteoEstado[status] === undefined) conteoEstado[status] = 0;
+                    conteoEstado[status]++;
                 }
             });
-            const columnas = [...statusList];
-            if (conteo.Otros) columnas.push('Otros');
-            // Tabla
-            let html = '<table><thead><tr>' + columnas.map(s=>`<th>${escapeHtml(s)}</th>`).join('') + '</tr></thead><tbody><tr>' + columnas.map(s=>`<td>${conteo[s]||0}</td>`).join('') + '</tr></tbody></table>';
-            document.getElementById('tablaStatus').innerHTML = html;
-            // Gráfico de pastel
-            if (window.chartStatusInstance) {
-                window.chartStatusInstance.destroy();
-            }
-            window.chartStatusInstance = new Chart(document.getElementById('chartStatus'), {
-                type: 'pie',
-                data: {
-                    labels: columnas,
-                    datasets: [{
-                        data: columnas.map(s=>conteo[s]||0),
-                        backgroundColor: columnas.map((s,i)=>`hsl(${i*50},80%,70%)`)
-                    }]
-                },
-                options: {
-                    responsive:true,
-                    plugins:{
-                        legend:{position:'right', labels:{font:{size:15}}},
-                        title:{display:true, text:'Distribución de estatus de ideas', font:{size:18}},
-                        tooltip:{
-                            callbacks:{
-                                label: function(ctx){
-                                    let total = ctx.dataset.data.reduce((a,b)=>a+b,0);
-                                    let val = ctx.parsed;
-                                    let pct = total ? ((val/total)*100).toFixed(1) : 0;
-                                    return ctx.label+': '+val+' ideas ('+pct+'%)';
-                                }
-                            }
-                        },
-                        datalabels: {
-                            display:true,
-                            color:'#222',
-                            font:{weight:'bold'},
-                            formatter: (v,ctx)=>{
-                                let total = ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
-                                let pct = total ? ((v/total)*100).toFixed(1) : 0;
-                                return v>0 ? v+' ('+pct+'%)' : '';
-                            }
-                        }
-                    }
-                },
-                plugins: [ChartDataLabels]
+
+            const total = encuestas.length || 1;
+            const container = document.getElementById('chartAvanceEstado');
+            if (!container) return;
+
+            let html = '<div style="display:grid; gap:10px;">';
+            Object.keys(conteoEstado).forEach((label, idx) => {
+                const count = conteoEstado[label] || 0;
+                const percent = Math.round((count / total) * 100);
+                html += `
+                    <div style="display:grid; grid-template-columns: 220px 1fr 70px; align-items:center; gap:10px;">
+                        <span style="font-weight:700; color:#1f2937;">${escapeHtml(label)}</span>
+                        <div style="width:100%; background:#f3f4f6; border-radius:10px; height:20px; overflow:hidden;">
+                            <div style="width:${percent}%; background:#f59e0b; height:100%;"></div>
+                        </div>
+                        <span style="font-weight:700; color:#111; text-align:right;">${count} (${percent}%)</span>
+                    </div>`;
             });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // 3. Ideas por área
+        function renderStatus(encuestas) {
+            const conteoArea = {};
+            encuestas.forEach(e => {
+                const areaRaw = e.area || e.Area || e.area || '';
+                const area = areaRaw.toString().trim();
+                if (!area) return;
+                const normal = escapeHtml(area);
+                conteoArea[normal] = (conteoArea[normal] || 0) + 1;
+            });
+
+            const areas = Object.keys(conteoArea).sort((a,b)=>conteoArea[b]-conteoArea[a]);
+            let html = '<table><thead><tr><th>Area</th><th>Cantidad</th></tr></thead><tbody>';
+            areas.forEach(area => {
+                html += `<tr><td>${area}</td><td>${conteoArea[area]}</td></tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('tablaStatus').innerHTML = html;
+
+            const chartStatusDiv = document.getElementById('chartStatus');
+            if (chartStatusDiv) {
+                const total = areas.reduce((sum, area) => sum + conteoArea[area], 0) || 1;
+                let chartHtml = '<div style="display:grid; gap:10px;">';
+                areas.forEach(area => {
+                    const count = conteoArea[area];
+                    const percent = Math.round((count / total) * 100);
+                    chartHtml += `
+                        <div style="display:grid; grid-template-columns: 180px 1fr 60px; align-items:center; gap:10px;">
+                            <span style="white-space: nowrap; font-weight:700;">${area}</span>
+                            <div style="width:100%; background:#e2e8f0; border-radius:10px; height:20px; overflow:hidden;">
+                                <div style="width:${percent}%; background:#3b82f6; height:100%;"></div>
+                            </div>
+                            <span style="text-align:right;">${count} (${percent}%)</span>
+                        </div>`;
+                });
+                chartHtml += '</div>';
+                chartStatusDiv.innerHTML = chartHtml;
+            }
         }
     </script>
 </body>
