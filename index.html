@@ -973,10 +973,40 @@
     }
     const db = firebase.database();
 
+    // Sincroniza ultimo_consecutivo con el máximo existente en encuestas
+    function syncUltimoConsecutivoFromEncuestas() {
+        return db.ref('encuestas').orderByKey().limitToLast(1).once('value').then((snapshot) => {
+            let maxFromKeys = 0;
+            snapshot.forEach((child) => {
+                const keyNum = parseInt(child.key, 10);
+                if (!isNaN(keyNum)) {
+                    maxFromKeys = Math.max(maxFromKeys, keyNum);
+                }
+                const item = child.val();
+                if (item && item.consecutivo) {
+                    const itemNum = parseInt(item.consecutivo, 10);
+                    if (!isNaN(itemNum)) {
+                        maxFromKeys = Math.max(maxFromKeys, itemNum);
+                    }
+                }
+            });
+
+            return db.ref('ultimo_consecutivo').once('value').then((s) => {
+                const current = parseInt(s.val(), 10) || 0;
+                if (maxFromKeys > current) {
+                    return db.ref('ultimo_consecutivo').set(maxFromKeys);
+                }
+                return Promise.resolve();
+            });
+        });
+    }
+
     // Función para guardar encuesta en Firebase con consecutivo y subnodos
     function guardarEncuesta(data) {
-        return db.ref('ultimo_consecutivo').transaction((current) => {
-            return (current || 0) + 1;
+        return syncUltimoConsecutivoFromEncuestas().then(() => {
+            return db.ref('ultimo_consecutivo').transaction((current) => {
+                return (current || 0) + 1;
+            });
         }).then((result) => {
             if (!result.committed) {
                 throw new Error('No se pudo actualizar el consecutivo.');
@@ -1315,6 +1345,11 @@
         }
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Asegura que ultimo_consecutivo esté sincronizado con los datos ya cargados
+        syncUltimoConsecutivoFromEncuestas().catch(err => {
+            console.error('Error al sincronizar ultimo_consecutivo:', err);
+        });
+
         const tipoMejoraChecks = document.querySelectorAll('input[name="tipo_mejora"]');
         tipoMejoraChecks.forEach(cb => cb.addEventListener('change', enforceMaxTipoMejora));
         const tipoIdeaChecks = document.querySelectorAll('input[name="tipo_idea"]');
