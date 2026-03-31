@@ -10,15 +10,22 @@
             font-family: 'Segoe UI', 'Montserrat', Arial, sans-serif;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
         .tabla-container {
-            width: 98vw;
+            width: 100%;
+            max-width: 100%;
             margin: 48px auto 0 auto;
             background: #fff;
             border-radius: 22px;
             box-shadow: 0 8px 32px #6366f180, 0 1.5px 0 #6366f155;
             padding: 32px 18px 32px 18px;
             overflow-x: auto;
+            overflow-y: auto;
+            height: calc(100vh - 170px);
+            position: sticky;
+            top: 70px;
+            z-index: 1;
         }
         .back-btn {
             display: inline-flex;
@@ -113,10 +120,11 @@
 </head>
 <body>
     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; margin:10px 2%; gap:10px;">
-        <a href="index.html" class="back-to-form">← Volver a Index</a>
+        <a href="index.html" class="back-to-form">← Volver</a>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
             <span id="db-welcome" style="color:#3749ff; font-weight:700;">Acceso a Base de Datos activo</span>
-            <input id="filterInput" type="text" placeholder="Filtrar filas por cualquier campo..." style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; width:280px; outline:none;" />
+            <input id="filterInput" type="text" placeholder="" style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; width:320px; outline:none;" />
+            <span id="filterStatus" style="font-weight:600; color:#1f2937; display:none;"></span>
             <button id="exportXlsxBtn" style="background:#10b981; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(16, 185, 129, 0.35);">Exportar</button>
             <button id="informeBtn" style="background:#2563eb; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(37, 99, 235, 0.35);">Informe</button>
         </div>
@@ -193,18 +201,51 @@
         let currentPage = 1;
         const pageSize = 50;
 
+        let filteredData = null; // Si es null, usa currentData completo
+
+        function getSourceData() {
+            return filteredData || currentData;
+        }
+
         function getPagedData() {
-            const totalPages = Math.max(1, Math.ceil(currentData.length / pageSize));
+            const source = getSourceData();
+            const totalPages = Math.max(1, Math.ceil(source.length / pageSize));
             if (currentPage > totalPages) currentPage = totalPages;
             const start = (currentPage - 1) * pageSize;
-            return currentData.slice(start, start + pageSize);
+            return source.slice(start, start + pageSize);
         }
 
         function updatePagination() {
-            const totalPages = Math.max(1, Math.ceil(currentData.length / pageSize));
-            pageInfo.textContent = `Página ${currentPage} de ${totalPages} (${currentData.length} registros)`;
+            const source = getSourceData();
+            const totalPages = Math.max(1, Math.ceil(source.length / pageSize));
+            pageInfo.textContent = `Página ${currentPage} de ${totalPages} (${source.length} registros` +
+                (filteredData ? ` / ${currentData.length} totales` : '') + `)`;
             prevPageBtn.disabled = currentPage <= 1;
             nextPageBtn.disabled = currentPage >= totalPages;
+        }
+
+        function parseDateValue(valor) {
+            if (valor === null || valor === undefined || valor === '') return '';
+            if (typeof valor === 'number' || (!isNaN(valor) && valor.toString().trim() !== '' && !/^\d{4}-\d{2}-\d{2}$/.test(valor.toString()))) {
+                const num = Number(valor);
+                if (!isNaN(num) && num > 10) {
+                    // Excel serial date (1900-based) y sin corregir 1900-leap bug
+                    const baseDate = new Date(Date.UTC(1899, 11, 30));
+                    const date = new Date(baseDate.getTime() + (num * 24 * 60 * 60 * 1000));
+                    if (!isNaN(date.getTime())) {
+                        return date.toISOString().slice(0,10);
+                    }
+                }
+            }
+            const str = String(valor).trim();
+            // Si ya está en YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+            // Si es con / o formateado por fecha javascript
+            const fecha = new Date(str);
+            if (!isNaN(fecha.getTime())) {
+                return fecha.toISOString().slice(0,10);
+            }
+            return str;
         }
 
         function getIdeaNameFromProposal(propuesta) {
@@ -279,8 +320,8 @@
                     <td>${(row.idea_en_desarrollo || '')}</td>
                     <td>${(row.premiacion || '')}</td>
                     <td>${(row.responsable_tarea || '')}</td>
-                    <td>${(row.fecha_revision || '')}</td>
-                    <td>${(row.fecha_fin || '')}</td>
+                    <td>${parseDateValue(row.fecha_revision || '')}</td>
+                    <td>${parseDateValue(row.fecha_fin || '')}</td>
                     <td>
                         <button type="button" class="edit-btn">Editar</button>
                         <button type="button" class="save-btn" style="display:none;">Guardar</button>
@@ -570,13 +611,14 @@
                         const input = document.createElement('input');
                         input.type = 'date';
                         input.style.width = '100%';
-                        input.value = current || '';
+                        input.value = parseDateValue(current || '');
                         cells[i].innerHTML = '';
                         cells[i].appendChild(input);
                         cells[i].style.background = '#fff7df';
                     } else {
                         const input = cells[i].querySelector('input[type="date"]');
-                        const value = input ? input.value : cells[i].innerText.trim();
+                        const rawValue = input ? input.value : cells[i].innerText.trim();
+                        const value = parseDateValue(rawValue);
                         cells[i].textContent = value;
                         cells[i].setAttribute('data-full-text', value);
                         cells[i].style.background = '#f8fafc';
@@ -629,11 +671,11 @@
 
             const fechaRevisionCell = cells[17];
             const fechaRevisionInput = fechaRevisionCell.querySelector('input[type="date"]');
-            const fechaRevisionValue = fechaRevisionInput ? fechaRevisionInput.value.trim() : fechaRevisionCell.innerText.trim();
+            const fechaRevisionValue = parseDateValue(fechaRevisionInput ? fechaRevisionInput.value.trim() : fechaRevisionCell.innerText.trim());
 
             const fechaFinCell = cells[18];
             const fechaFinInput = fechaFinCell.querySelector('input[type="date"]');
-            const fechaFinValue = fechaFinInput ? fechaFinInput.value.trim() : fechaFinCell.innerText.trim();
+            const fechaFinValue = parseDateValue(fechaFinInput ? fechaFinInput.value.trim() : fechaFinCell.innerText.trim());
 
             const updated = {
                 nombre_idea: cells[1].innerText.trim(),
@@ -736,13 +778,58 @@
             });
         }
 
+        const filterStatus = document.getElementById('filterStatus');
+
+        function rowMatches(row, filterValue) {
+            if (!filterValue) return true;
+            const haystack = [
+                row.consecutivo, row.nombre_idea, row.nombre, row.documento, row.telefono,
+                row.area, row.situacion, row.propuesta, row.justificacion, row.correo,
+                Array.isArray(row.tipo_mejora) ? row.tipo_mejora.join(' ') : row.tipo_mejora,
+                Array.isArray(row.tipo_idea) ? row.tipo_idea.join(' ') : row.tipo_idea,
+                row.estado, row.comentarios_lean, row.idea_en_desarrollo,
+                row.premiacion, row.responsable_tarea, row.fecha_revision, row.fecha_fin
+            ].filter(Boolean).map(x => String(x).toLowerCase()).join(' ');
+            return haystack.includes(filterValue);
+        }
+
         function applyFilter() {
             const filterValue = filterInput ? filterInput.value.toLowerCase().trim() : '';
-            tbody.querySelectorAll('tr').forEach((tr) => {
-                const text = tr.textContent.toLowerCase();
-                const match = !filterValue || text.includes(filterValue);
-                tr.style.display = match ? '' : 'none';
-            });
+
+            if (filterValue === '') {
+                filteredData = null;
+                currentPage = 1;
+                renderPage();
+                if (filterStatus) filterStatus.textContent = `Mostrando ${currentData.length} registros`;
+                return;
+            }
+
+            filteredData = currentData.filter(row => rowMatches(row, filterValue));
+            const firstMatchIndex = filteredData.findIndex(row => rowMatches(row, filterValue));
+            if (firstMatchIndex >= 0) {
+                currentPage = Math.floor(firstMatchIndex / pageSize) + 1;
+            } else {
+                currentPage = 1;
+            }
+
+            renderPage();
+
+            const totalMatches = filteredData.length;
+            const totalPages = Math.max(1, Math.ceil((filteredData || []).length / pageSize));
+            const msg = totalMatches > 0
+                ? `Encontrados ${totalMatches} in. en ${totalPages} página(s) (pagina actual ${currentPage})`
+                : 'No se encontraron coincidencias';
+            if (filterStatus) filterStatus.textContent = msg;
+
+            if (filterInput) {
+                const totales = currentData.length;
+                if (filterValue) {
+                    filterInput.placeholder = `Filtrar filas... (${totalMatches}/${totales} encontrados)`;
+                } else {
+                    filterInput.placeholder = `Filtrar filas por todo el archivo (Nombre, Área, Estado...) (${totales} totales)`;
+                }
+            }
+
             highlightTable(filterValue);
         }
 
