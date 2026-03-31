@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Datos - Mentes Brillantes</title>
+    <style>
+        body {
+            background: linear-gradient(120deg, #f8fafc 0%, #e0e7ff 100%);
+            font-family: 'Segoe UI', 'Montserrat', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .tabla-container {
+            width: 98vw;
+            margin: 48px auto 0 auto;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 8px 32px #6366f180, 0 1.5px 0 #6366f155;
+            padding: 32px 18px 32px 18px;
+            overflow-x: auto;
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            padding: 10px 16px;
+            border-radius: 14px;
+            border: 1px solid #5b4dff;
+            background: linear-gradient(90deg, #eef2ff 0%, #eef2ff 100%);
+            color: #3749ff;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 5px 16px rgba(60, 80, 250, 0.25);
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+        .back-btn:hover {
+            transform: translateY(-1px);
+            background: linear-gradient(90deg, #d9e5ff 0%, #ebf0ff 100%);
+            box-shadow: 0 8px 18px rgba(70, 95, 255, 0.28);
+        }
+        table {
+            width: 100%;
+            min-width: 1800px;
+            border-collapse: collapse;
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            table-layout: auto;
+        }
+        thead th {
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            color: #fff;
+            font-weight: 700;
+            border: 1.5px solid #6366f1;
+            padding: 14px 12px;
+            text-align: center;
+            font-size: 1em;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
+        }
+        tbody td {
+            border: 1.5px solid #e0e7ff;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 0.98em;
+            background: #f8fafc;
+            transition: background 0.18s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        tbody td:nth-child(7) {
+            /* Situación actual */
+            max-width: 220px;
+            white-space: normal;
+            word-break: break-word;
+            vertical-align: top;
+            height: auto;
+            max-height:120px;
+            overflow-y:auto;
+        }
+        tbody tr:nth-child(even) td {
+            background: #e0e7ff33;
+        }
+        tbody tr:hover td {
+            background: #c7d2fe88;
+        }
+        @media (max-width: 900px) {
+            .tabla-container { padding: 8px 2px; }
+            table, thead, tbody, th, td, tr { font-size: 0.92em; }
+        }
+        .back-to-form {
+            display: inline-block;
+            margin: 12px 20px 0;
+            color: #fff;
+            background: linear-gradient(90deg, #6366f1 0%, #818cf8 100%);
+            border: 1px solid #4f46e5;
+            border-radius: 10px;
+            padding: 10px 16px;
+            text-decoration: none;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+        .back-to-form:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 7px 18px rgba(99, 102, 241, 0.54);
+        }
+    </style>
+</head>
+<body>
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; margin:10px 2%; gap:10px;">
+        <a href="index.html" class="back-to-form">← Volver a Index</a>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span id="db-welcome" style="color:#3749ff; font-weight:700;">Acceso a Base de Datos activo</span>
+            <input id="filterInput" type="text" placeholder="Filtrar filas por cualquier campo..." style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; width:280px; outline:none;" />
+            <button id="exportXlsxBtn" style="background:#10b981; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(16, 185, 129, 0.35);">Exportar</button>
+            <button id="informeBtn" style="background:#2563eb; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(37, 99, 235, 0.35);">Informe</button>
+        </div>
+    </div>
+    <div class="tabla-container">
+        <div id="pagination-controls" style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-bottom:10px;">
+            <button id="prevPage" style="padding:6px 12px; border-radius:8px; border:1px solid #94a3b8; background:#fff; cursor:pointer;">Anterior</button>
+            <span id="pageInfo" style="font-weight:700; color:#334155;"></span>
+            <button id="nextPage" style="padding:6px 12px; border-radius:8px; border:1px solid #94a3b8; background:#fff; cursor:pointer;">Siguiente</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Idea N°</th>
+                    <th>Nombre de la idea</th>
+                    <th>Nombres y apellidos</th>
+                    <th>Numero de documento</th>
+                    <th>Celular</th>
+                    <th>Area</th>
+                    <th>Situación actual</th>
+                    <th>Propuesta</th>
+                    <th>Justificacion</th>
+                    <th>Correo electronico</th>
+                    <th>Tipo de mejora</th>
+                    <th>Tipo de idea</th>
+                    <th>Estado</th>
+                    <th>Comentarios Lean</th>
+                    <th>Idea en desarrollo</th>
+                    <th>Premiación</th>
+                    <th>Responsable tarea</th>
+                    <th>Fecha revisión</th>
+                    <th>Fecha fin</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-encuestas">
+                <tr><td colspan="19">Cargando datos...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSJvvvyiY9-419R1gETR6lopy2P1vQbkY",
+            authDomain: "despertando-ideas.firebaseapp.com",
+            databaseURL: "https://despertando-ideas-default-rtdb.firebaseio.com",
+            projectId: "despertando-ideas",
+            storageBucket: "despertando-ideas.firebasestorage.app",
+            messagingSenderId: "677954954360",
+            appId: "1:677954954360:web:9cc25ac38c1362282ff98d",
+            measurementId: "G-ZCFT4Z84TE"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const db = firebase.database();
+
+        // Control de acceso global: si no se autenticó con clave en la sesión actual, redirigir a formulario de contraseña en Index
+        if (sessionStorage.getItem('dbAuth') !== 'true') {
+            window.location.href = 'index.html?showDB=1';
+        }
+
+        const tbody = document.getElementById('tbody-encuestas');
+        const pageInfo = document.getElementById('pageInfo');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+
+        let currentData = [];
+        let currentPage = 1;
+        const pageSize = 50;
+
+        function getPagedData() {
+            const totalPages = Math.max(1, Math.ceil(currentData.length / pageSize));
+            if (currentPage > totalPages) currentPage = totalPages;
+            const start = (currentPage - 1) * pageSize;
+            return currentData.slice(start, start + pageSize);
+        }
+
+        function updatePagination() {
+            const totalPages = Math.max(1, Math.ceil(currentData.length / pageSize));
+            pageInfo.textContent = `Página ${currentPage} de ${totalPages} (${currentData.length} registros)`;
+            prevPageBtn.disabled = currentPage <= 1;
+            nextPageBtn.disabled = currentPage >= totalPages;
+        }
+
+        function getIdeaNameFromProposal(propuesta) {
+            if (!propuesta || typeof propuesta !== 'string') return '';
+            const stopWords = new Set(['el','la','los','las','un','una','unos','unas','de','del','y','o','a','en','con','para','por','al','se','que','es','son','ser','su','sus','como','más','sobre','entre','sin','algunas','algunos','este','esta','estos','estas','desde','hasta','me','mi','mis','tu','tus','le','les','lo','los','las','esto','aquello','esto','eso','antes','despues','donde','cuando','porque']);
+            const cleaned = propuesta.toLowerCase().replace(/[^a-záéíóúüñ\s]/g, ' ').replace(/\s+/g, ' ').trim();
+            const wordsAll = cleaned.split(' ').filter(w => w.length > 2);
+            const priority = ['material','proceso','lineas','produccion','automatizar','solicitudes','equipo','herramienta','website','televisor'];
+            const primes = [];
+            for (let i = 0; i < wordsAll.length; i++) {
+                const w = wordsAll[i];
+                if (stopWords.has(w)) continue;
+                if (primes.indexOf(w) === -1 && (priority.includes(w) || w.length > 4)) {
+                    primes.push(w);
+                }
+            }
+            const ngrams = {};
+            const validWords = wordsAll.filter(w => !stopWords.has(w) && w.length > 2);
+            for (let i = 0; i < validWords.length - 1; i++) {
+                const ng = `${validWords[i]} ${validWords[i + 1]}`;
+                ngrams[ng] = (ngrams[ng] || 0) + 1;
+            }
+            const topNgrams = Object.keys(ngrams).sort((a, b) => ngrams[b] - ngrams[a]).slice(0, 3);
+            const ideaParts = [];
+            topNgrams.forEach(ng => {
+                if (ideaParts.length < 3) {
+                    const tokens = ng.split(' ');
+                    tokens.forEach(t => { if (ideaParts.length < 3 && !ideaParts.includes(t)) ideaParts.push(t); });
+                }
+            });
+            for (const t of primes) {
+                if (ideaParts.length >= 3) break;
+                if (!ideaParts.includes(t)) ideaParts.push(t);
+            }
+            if (ideaParts.length === 0) {
+                for (const w of validWords) {
+                    if (ideaParts.length >= 3) break;
+                    if (!ideaParts.includes(w)) ideaParts.push(w);
+                }
+            }
+            return ideaParts.slice(0, 3).join(' ');
+        }
+
+        function renderPage() {
+            const normalizeValue = (row, ...aliases) => {
+                for (const a of aliases) {
+                    if (row[a] !== undefined && row[a] !== null && String(row[a]).trim() !== '') {
+                        return row[a];
+                    }
+                }
+                return '';
+            };
+
+            const rows = getPagedData().map(row => {
+                const ideaNameRaw = normalizeValue(row, 'nombre_idea', 'name_idea', 'Nombre de la idea', 'nombre_de_la_idea');
+                const ideaName = ideaNameRaw && String(ideaNameRaw).trim() ? String(ideaNameRaw).trim() : getIdeaNameFromProposal(row.propuesta || row.propuesta_text);
+                return `<tr data-key="${row.key}">
+                    <td>${row.consecutivo || row.key || ''}</td>
+                    <td>${ideaName}</td>
+                    <td>${normalizeValue(row, 'nombre', 'name', 'nombres_y_apellidos', 'Nombres y apellidos')}</td>
+                    <td>${normalizeValue(row, 'documento', 'numero_de_documento', 'Numero de documento')}</td>
+                    <td>${normalizeValue(row, 'telefono', 'celular', 'Telefono')}</td>
+                    <td>${normalizeValue(row, 'area', 'Area')}</td>
+                    <td>${(row.situacion || '')}</td>
+                    <td>${(row.propuesta || '')}</td>
+                    <td>${(row.justificacion || '')}</td>
+                    <td>${(row.correo || '')}</td>
+                    <td>${Array.isArray(row.tipo_mejora) ? row.tipo_mejora.join(', ') : (row.tipo_mejora || '')}</td>
+                    <td>${Array.isArray(row.tipo_idea) ? row.tipo_idea.join(', ') : (row.tipo_idea || '')}</td>
+                    <td>${(row.estado || '')}</td>
+                    <td>${(row.comentarios_lean || '')}</td>
+                    <td>${(row.idea_en_desarrollo || '')}</td>
+                    <td>${(row.premiacion || '')}</td>
+                    <td>${(row.responsable_tarea || '')}</td>
+                    <td>${(row.fecha_revision || '')}</td>
+                    <td>${(row.fecha_fin || '')}</td>
+                    <td>
+                        <button type="button" class="edit-btn">Editar</button>
+                        <button type="button" class="save-btn" style="display:none;">Guardar</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = rows.join('');
+            tbody.querySelectorAll('tr').forEach(tr => setRowEditable(tr, false));
+            attachRowButtons();
+            updatePagination();
+        }
+
+        function renderEncuestasList(snapshot) {
+            const data = snapshot.val();
+            if (!data) {
+                currentData = [];
+                currentPage = 1;
+                tbody.innerHTML = '<tr><td colspan="19">No hay registros en la base de datos.</td></tr>';
+                updatePagination();
+                return;
+            }
+
+            currentData = Object.keys(data).sort().map(key => {
+                const row = data[key] || {};
+                const consecutivo = row.consecutivo ? row.consecutivo.toString().padStart(5, '0') : key;
+                return { key, consecutivo, ...row };
+            });
+            currentPage = 1;
+            renderPage();
+        }
+
+        function truncarTexto(texto) {
+            const palabras = texto.trim().split(/\s+/);
+            if (palabras.length <= 5) return texto.trim();
+            return palabras.slice(0, 5).join(' ') + ' ...';
+        }
+
+        function setRowEditable(tr, editable) {
+            const cells = Array.from(tr.querySelectorAll('td'));
+            const areaOptions = ['Maquillajes','Emulsiones','Hidroalcoholes','Almacén','Cendis','Mantenimiento','Calidad','LEAN','TTCA'];
+            for (let i = 1; i < cells.length - 1; i++) {
+                if (i === 5) { // area column
+                    if (editable) {
+                        const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
+                        const currentTokens = current.split(/[,;\n]/).map(t => t.trim()).filter(Boolean);
+                        const select = document.createElement('select');
+                        select.style.width = '100%';
+                        for (const opt of areaOptions) {
+                            const option = document.createElement('option');
+                            option.value = opt;
+                            option.text = opt;
+                            if (currentTokens.some(t => t.toUpperCase() === opt.toUpperCase())) {
+                                option.selected = true;
+                            }
+                            select.appendChild(option);
+                        }
+                        cells[i].innerHTML = '';
+                        cells[i].appendChild(select);
+                        cells[i].style.background = '#fff7df';
+                    } else {
+                        const select = cells[i].querySelector('select');
+                        if (select) {
+                            const value = select.value.trim();
+                            cells[i].textContent = value;
+                            cells[i].setAttribute('data-full-text', value);
+                        } else {
+                            const value = cells[i].innerText.trim();
+                            cells[i].setAttribute('data-full-text', value);
+                        }
+                        cells[i].style.background = '#f8fafc';
+                    }
+                    continue;
+                }
+
+                if (i === 12) { // estado column
+                    const estadoOptions = ['CERRADA', 'EN CONSULTA DE VIABILIDAD', 'IMPLEMENTADA', 'NO VIABLE', 'PROYECTO LEAN', 'UNIFICADA', 'VIABLE'];
+                    if (editable) {
+                        const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
+                        const select = document.createElement('select');
+                        select.style.width = '100%';
+
+                        // Opción vacía por defecto
+                        const emptyOption = document.createElement('option');
+                        emptyOption.value = '';
+                        emptyOption.text = '';
+                        emptyOption.selected = true;
+                        select.appendChild(emptyOption);
+
+                        for (const opt of estadoOptions) {
+                            const option = document.createElement('option');
+                            option.value = opt;
+                            option.text = opt;
+                            if (current && opt.toUpperCase() === current.toUpperCase()) {
+                                option.selected = true;
+                            }
+                            select.appendChild(option);
+                        }
+                        cells[i].innerHTML = '';
+                        cells[i].appendChild(select);
+                        cells[i].style.background = '#fff7df';
+                    } else {
+                        const select = cells[i].querySelector('select');
+                        if (select) {
+                            const value = select.value.trim();
+                            cells[i].textContent = value;
+                            cells[i].setAttribute('data-full-text', value);
+                        } else {
+                            const value = cells[i].innerText.trim();
+                            cells[i].setAttribute('data-full-text', value);
+                        }
+                        cells[i].style.background = '#f8fafc';
+                    }
+                    continue;
+                }
+
+                if (i === 6) { // situación actual
+                    if (editable) {
+                        cells[i].textContent = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        cells[i].contentEditable = 'true';
+                        cells[i].style.whiteSpace = 'normal';
+                        cells[i].style.overflow = 'auto';
+                        cells[i].style.maxHeight = '120px';
+                    } else {
+                        const full = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        cells[i].setAttribute('data-full-text', full);
+                        cells[i].textContent = truncarTexto(full);
+                        cells[i].contentEditable = 'false';
+                        cells[i].style.whiteSpace = 'nowrap';
+                        cells[i].style.overflow = 'hidden';
+                        cells[i].style.textOverflow = 'ellipsis';
+                        cells[i].style.maxHeight = '';
+                        cells[i].style.height = 'auto';
+                    }
+                    cells[i].style.background = editable ? '#fff7df' : '#f8fafc';
+                    continue;
+                }
+
+                if (i === 7) { // propuesta
+                    if (editable) {
+                        cells[i].textContent = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        cells[i].contentEditable = 'true';
+                        cells[i].style.whiteSpace = 'normal';
+                        cells[i].style.overflow = 'auto';
+                        cells[i].style.maxHeight = '120px';
+                    } else {
+                        const full = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        cells[i].setAttribute('data-full-text', full);
+                        cells[i].textContent = truncarTexto(full);
+                        cells[i].contentEditable = 'false';
+                        cells[i].style.whiteSpace = 'nowrap';
+                        cells[i].style.overflow = 'hidden';
+                        cells[i].style.textOverflow = 'ellipsis';
+                        cells[i].style.maxHeight = '';
+                        cells[i].style.height = 'auto';
+                    }
+                    cells[i].style.background = editable ? '#fff7df' : '#f8fafc';
+                    continue;
+                }
+
+                if (i === 8) { // justificacion
+                    if (editable) {
+                        cells[i].textContent = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        cells[i].contentEditable = 'true';
+                        cells[i].style.whiteSpace = 'normal';
+                        cells[i].style.overflow = 'auto';
+                        cells[i].style.maxHeight = '120px';
+                    } else {
+                        const full = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        cells[i].setAttribute('data-full-text', full);
+                        cells[i].textContent = truncarTexto(full);
+                        cells[i].contentEditable = 'false';
+                        cells[i].style.whiteSpace = 'nowrap';
+                        cells[i].style.overflow = 'hidden';
+                        cells[i].style.textOverflow = 'ellipsis';
+                        cells[i].style.maxHeight = '';
+                        cells[i].style.height = 'auto';
+                    }
+                    cells[i].style.background = editable ? '#fff7df' : '#f8fafc';
+                    continue;
+                }
+
+                if (i === 13) { // comentarios lean
+                    if (editable) {
+                        cells[i].textContent = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        cells[i].contentEditable = 'true';
+                        cells[i].style.whiteSpace = 'normal';
+                        cells[i].style.overflow = 'auto';
+                        cells[i].style.maxHeight = '120px';
+                    } else {
+                        const full = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        cells[i].setAttribute('data-full-text', full);
+                        cells[i].textContent = truncarTexto(full);
+                        cells[i].contentEditable = 'false';
+                        cells[i].style.whiteSpace = 'nowrap';
+                        cells[i].style.overflow = 'hidden';
+                        cells[i].style.textOverflow = 'ellipsis';
+                        cells[i].style.maxHeight = '';
+                        cells[i].style.height = 'auto';
+                    }
+                    cells[i].style.background = editable ? '#fff7df' : '#f8fafc';
+                    continue;
+                }
+
+                if (i === 14) { // idea en desarrollo
+                    const ideaDevOptions = ['CON FEED BACK', 'IDEA EN DESARROLLO', 'IMPLEMENTADA', 'PENDIENTE FEED BACK'];
+                    if (editable) {
+                        const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
+                        const select = document.createElement('select');
+                        select.style.width = '100%';
+
+                        const emptyOption = document.createElement('option');
+                        emptyOption.value = '';
+                        emptyOption.text = '';
+                        emptyOption.selected = true;
+                        select.appendChild(emptyOption);
+
+                        for (const opt of ideaDevOptions) {
+                            const option = document.createElement('option');
+                            option.value = opt;
+                            option.text = opt;
+                            if (current && opt.toUpperCase() === current.toUpperCase()) {
+                                option.selected = true;
+                            }
+                            select.appendChild(option);
+                        }
+                        cells[i].innerHTML = '';
+                        cells[i].appendChild(select);
+                        cells[i].style.background = '#fff7df';
+                    } else {
+                        const select = cells[i].querySelector('select');
+                        if (select) {
+                            const value = select.value.trim();
+                            cells[i].textContent = value;
+                            cells[i].setAttribute('data-full-text', value);
+                        } else {
+                            const value = cells[i].innerText.trim();
+                            cells[i].setAttribute('data-full-text', value);
+                        }
+                        cells[i].style.background = '#f8fafc';
+                    }
+                    continue;
+                }
+
+                if (i === 15) { // premiación
+                    const premiacionOptions = ['CERRADA', 'IDEA EN DESARROLLO', 'IMPLEMENTADA', 'PENDIENTE FEED BACK', 'PENDIENTE PREMIACION', 'PREMIADA', 'PROPUESTA DUPLICADA'];
+                    if (editable) {
+                        const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
+                        const select = document.createElement('select');
+                        select.style.width = '100%';
+
+                        const emptyOption = document.createElement('option');
+                        emptyOption.value = '';
+                        emptyOption.text = '';
+                        emptyOption.selected = true;
+                        select.appendChild(emptyOption);
+
+                        for (const opt of premiacionOptions) {
+                            const option = document.createElement('option');
+                            option.value = opt;
+                            option.text = opt;
+                            if (current && opt.toUpperCase() === current.toUpperCase()) {
+                                option.selected = true;
+                            }
+                            select.appendChild(option);
+                        }
+                        cells[i].innerHTML = '';
+                        cells[i].appendChild(select);
+                        cells[i].style.background = '#fff7df';
+                    } else {
+                        const select = cells[i].querySelector('select');
+                        if (select) {
+                            const value = select.value.trim();
+                            cells[i].textContent = value;
+                            cells[i].setAttribute('data-full-text', value);
+                        } else {
+                            const value = cells[i].innerText.trim();
+                            cells[i].setAttribute('data-full-text', value);
+                        }
+                        cells[i].style.background = '#f8fafc';
+                    }
+                    continue;
+                }
+
+                if (i === 17 || i === 18) { // fecha revisión / fecha fin
+                    if (editable) {
+                        const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
+                        const input = document.createElement('input');
+                        input.type = 'date';
+                        input.style.width = '100%';
+                        input.value = current || '';
+                        cells[i].innerHTML = '';
+                        cells[i].appendChild(input);
+                        cells[i].style.background = '#fff7df';
+                    } else {
+                        const input = cells[i].querySelector('input[type="date"]');
+                        const value = input ? input.value : cells[i].innerText.trim();
+                        cells[i].textContent = value;
+                        cells[i].setAttribute('data-full-text', value);
+                        cells[i].style.background = '#f8fafc';
+                    }
+                    continue;
+                }
+
+                cells[i].contentEditable = editable ? 'true' : 'false';
+                cells[i].style.background = editable ? '#fff7df' : '#f8fafc';
+            }
+        }
+
+        function attachRowButtons() {
+            tbody.querySelectorAll('tr').forEach(tr => {
+                const editBtn = tr.querySelector('.edit-btn');
+                const saveBtn = tr.querySelector('.save-btn');
+                if (!editBtn || !saveBtn) return;
+
+                editBtn.onclick = () => {
+                    setRowEditable(tr, true);
+                    editBtn.style.display = 'none';
+                    saveBtn.style.display = 'inline-block';
+                };
+
+                saveBtn.onclick = () => {
+                    saveRow(tr);
+                };
+            });
+        }
+
+        function saveRow(tr) {
+            const key = tr.dataset.key;
+            if (!key) return;
+            const cells = tr.querySelectorAll('td');
+            const areaCell = cells[5];
+            const areaSelect = areaCell.querySelector('select');
+            const areaValue = areaSelect ? areaSelect.value.trim() : areaCell.innerText.trim();
+
+            const estadoCell = cells[12];
+            const estadoSelect = estadoCell.querySelector('select');
+            const estadoValue = estadoSelect ? estadoSelect.value.trim() : estadoCell.innerText.trim();
+
+            const ideaDevCell = cells[14];
+            const ideaDevSelect = ideaDevCell.querySelector('select');
+            const ideaDevValue = ideaDevSelect ? ideaDevSelect.value.trim() : ideaDevCell.innerText.trim();
+
+            const premiacionCell = cells[15];
+            const premiacionSelect = premiacionCell.querySelector('select');
+            const premiacionValue = premiacionSelect ? premiacionSelect.value.trim() : premiacionCell.innerText.trim();
+
+            const fechaRevisionCell = cells[17];
+            const fechaRevisionInput = fechaRevisionCell.querySelector('input[type="date"]');
+            const fechaRevisionValue = fechaRevisionInput ? fechaRevisionInput.value.trim() : fechaRevisionCell.innerText.trim();
+
+            const fechaFinCell = cells[18];
+            const fechaFinInput = fechaFinCell.querySelector('input[type="date"]');
+            const fechaFinValue = fechaFinInput ? fechaFinInput.value.trim() : fechaFinCell.innerText.trim();
+
+            const updated = {
+                nombre_idea: cells[1].innerText.trim(),
+                nombre: cells[2].innerText.trim(),
+                documento: cells[3].innerText.trim(),
+                telefono: cells[4].innerText.trim(),
+                area: areaValue,
+                situacion: cells[6].innerText.trim(),
+                propuesta: cells[7].innerText.trim(),
+                justificacion: cells[8].innerText.trim(),
+                estado: estadoValue,
+                idea_en_desarrollo: ideaDevValue,
+                premiacion: premiacionValue,
+                correo: cells[9].innerText.trim(),
+                tipo_mejora: cells[10].innerText.split(',').map(v => v.trim()).filter(Boolean),
+                tipo_idea: cells[11].innerText.split(',').map(v => v.trim()).filter(Boolean),
+                comentarios_lean: cells[13].innerText.trim(),
+                responsable_tarea: cells[16].innerText.trim(),
+                fecha_revision: fechaRevisionValue,
+                fecha_fin: fechaFinValue,
+            };
+
+            db.ref('encuestas/' + key).update(updated).then(() => {
+                setRowEditable(tr, false);
+                tr.querySelector('.edit-btn').style.display = 'inline-block';
+                tr.querySelector('.save-btn').style.display = 'none';
+                showNotification('Registro guardado con éxito.', true);
+            }).catch(error => {
+                console.error('Error al guardar fila:', error);
+                showNotification('Error al guardar fila: ' + (error.message || 'Error desconocido'), false);
+            });
+        }
+
+        function showNotification(message, success) {
+            let note = document.getElementById('bd-notification');
+            if (!note) {
+                note = document.createElement('div');
+                note.id = 'bd-notification';
+                note.style.position = 'fixed';
+                note.style.bottom = '20px';
+                note.style.right = '20px';
+                note.style.padding = '14px 20px';
+                note.style.borderRadius = '14px';
+                note.style.zIndex = '10000';
+                note.style.fontWeight = '700';
+                note.style.color = '#fff';
+                note.style.boxShadow = '0 8px 24px rgba(0,0,0,0.25)';
+                note.style.maxWidth = 'calc(100vw - 40px)';
+                note.style.minWidth = '250px';
+                note.style.textAlign = 'center';
+                document.body.appendChild(note);
+            }
+            note.textContent = message;
+            note.style.background = success ? '#1caf78' : '#d43a47';
+            note.style.display = 'block';
+            clearTimeout(note._timeout);
+            note._timeout = setTimeout(() => { note.style.display = 'none'; }, 3200);
+        }
+
+        function showError(message) {
+            tbody.innerHTML = `<tr><td colspan="19" style="color:red; font-weight:bold;">Error al cargar datos: ${message}</td></tr>`;
+        }
+
+        db.ref('encuestas').orderByKey().on('value', renderEncuestasList, (error) => {
+            console.error('Error al leer encuestas:', error);
+            showError(error.message || 'Error desconocido');
+        });
+
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage -= 1;
+                renderPage();
+            }
+        });
+        nextPageBtn.addEventListener('click', () => {
+            const totalPages = Math.max(1, Math.ceil(currentData.length / pageSize));
+            if (currentPage < totalPages) {
+                currentPage += 1;
+                renderPage();
+            }
+        });
+
+        const filterInput = document.getElementById('filterInput');
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+        }
+
+        function highlightTable(filterValue) {
+            const regex = new RegExp('(' + escapeRegExp(filterValue) + ')', 'gi');
+            tbody.querySelectorAll('tr').forEach((tr) => {
+                tr.querySelectorAll('td').forEach((cell) => {
+                    const rawText = cell.textContent;
+                    if (!filterValue) {
+                        cell.textContent = rawText;
+                    } else {
+                        cell.innerHTML = rawText.replace(regex, '<mark style="background:#fff176;color:#000;padding:0 2px;border-radius:2px;">$1</mark>');
+                    }
+                });
+            });
+        }
+
+        function applyFilter() {
+            const filterValue = filterInput ? filterInput.value.toLowerCase().trim() : '';
+            tbody.querySelectorAll('tr').forEach((tr) => {
+                const text = tr.textContent.toLowerCase();
+                const match = !filterValue || text.includes(filterValue);
+                tr.style.display = match ? '' : 'none';
+            });
+            highlightTable(filterValue);
+        }
+
+        if (filterInput) {
+            filterInput.addEventListener('input', applyFilter);
+        }
+
+        function exportTableToXLSX(filename = 'base_de_datos.xlsx') {
+            if (!currentData || currentData.length === 0) return;
+            const wb = XLSX.utils.book_new();
+
+            // Definir encabezados exactos
+            const headers = ['Idea N°','Nombre de la idea','Nombres y apellidos','Numero de documento','Celular','Area','Situación actual','Propuesta','Justificacion','Correo electronico','Tipo de mejora','Tipo de idea','Estado','Comentarios Lean','Idea en desarrollo','Premiación','Responsable tarea','Fecha revisión','Fecha fin'];
+
+            const csvData = currentData.map(row => {
+                return [
+                    row.consecutivo || row.key || '',
+                    row.nombre_idea || '',
+                    row.nombre || '',
+                    row.documento || '',
+                    row.telefono || '',
+                    row.area || '',
+                    row.situacion || '',
+                    row.propuesta || '',
+                    row.justificacion || '',
+                    row.correo || '',
+                    Array.isArray(row.tipo_mejora) ? row.tipo_mejora.join(', ') : row.tipo_mejora || '',
+                    Array.isArray(row.tipo_idea) ? row.tipo_idea.join(', ') : row.tipo_idea || '',
+                    row.estado || '',
+                    row.comentarios_lean || '',
+                    row.idea_en_desarrollo || '',
+                    row.premiacion || '',
+                    row.responsable_tarea || '',
+                    row.fecha_revision || '',
+                    row.fecha_fin || ''
+                ];
+            });
+
+            const ws = XLSX.utils.aoa_to_sheet([headers, ...csvData]);
+
+            // Aplicar estilos a encabezado y centrar celdas
+            const range = XLSX.utils.decode_range(ws['!ref']);
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cellAddress = XLSX.utils.encode_cell({r: 0, c: C});
+                if (!ws[cellAddress]) continue;
+                ws[cellAddress].s = {
+                    font: {bold: true, color: {rgb: 'FFFFFFFF'}},
+                    fill: {fgColor: {rgb: 'FF3B82F6'}},
+                    alignment: {horizontal: 'center', vertical: 'center'}
+                };
+            }
+
+            // Estilo de datos y anchos
+            const colWidths = [9, 25, 22, 18, 14, 13, 30, 32, 28, 24, 18, 18, 12, 24, 18, 14, 20, 14, 12];
+            ws['!cols'] = colWidths.map(w => ({wpx: w * 7}));
+
+            for (let R = 1; R <= range.e.r; ++R) {
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const addr = XLSX.utils.encode_cell({r: R, c: C});
+                    if (!ws[addr]) continue;
+                    ws[addr].s = {
+                        alignment: {horizontal: 'center', vertical: 'center', wrapText: true}
+                    };
+                }
+            }
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Encuesas');
+            XLSX.writeFile(wb, filename);
+        }
+
+        function currentDateFileName() {
+            const now = new Date();
+            const yyyy = String(now.getFullYear());
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const dd = String(now.getDate()).padStart(2, '0');
+            return `Base de datos ${yyyy}-${mm}-${dd}.xlsx`;
+        }
+
+        const exportXlsxBtn = document.getElementById('exportXlsxBtn');
+        if (exportXlsxBtn) {
+            exportXlsxBtn.addEventListener('click', () => {
+                exportTableToXLSX(currentDateFileName());
+            });
+        }
+
+        const informeBtn = document.getElementById('informeBtn');
+        if (informeBtn) {
+            informeBtn.addEventListener('click', () => {
+                window.location.href = 'Informe.html';
+            });
+        }
+
+    </script>
+</body>
+</html>
