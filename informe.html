@@ -78,16 +78,17 @@
             transition: background 0.2s, transform 0.2s;
         }
         .btn-volver {
-            position: absolute;
+            position: fixed;
             top: 16px;
-            right: 150px;
+            right: 16px;
             background: #4f46e5;
             color: #fff;
-            z-index: 7;
+            z-index: 9999;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
         .btn-export {
-            position: absolute;
-            top: 16px;
+            position: fixed;
+            top: 70px;
             right: 16px;
             background: #10b981;
             color: #fff;
@@ -309,29 +310,15 @@
             <h1>Informe de Encuestas</h1>
         </div>
         <div class="banner">Panel de resultados y análisis</div>
-        <button class="btn-volver" onclick="window.location.href='BD.html'">Volver al Panel</button>
-        <button class="btn-export" onclick="exportInformeExcel()">Exportar</button>
-        <div style="margin-top:16px; display:flex; gap:8px; align-items:center;">
+        <button class="btn-volver" onclick="window.location.href='BD.html'"><i class="fa fa-arrow-left" style="margin-right:8px"></i>Volver</button>
+        <button class="btn-export" onclick="exportInformeExcel()"><i class="fa fa-file-excel" style="margin-right:8px"></i>Exportar</button>
+        <div style="margin-top:4px; display:flex; gap:8px; align-items:center;">
             <input id="excelUpload" type="file" accept=".xlsx,.xls" style="padding:6px; border:1px solid #ccc; border-radius:8px;" />
             <button id="uploadExcelBtn" style="background:#2563eb; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700;">Subir Excel a Firebase</button>
             <span id="uploadStatus" style="font-weight:600; color:#334155;"></span>
         </div>
-        <div class="resumen" style="background:#fffbe7; border-radius:10px; padding:18px; margin-bottom:24px; color:#a67c00; font-size:1.1em;">
-            <b>Este informe muestra:</b><br>
-            1. Número de ideas segregado por proceso y tipo de idea.<br>
-            2. Avance de cada una y avance general.<br>
-            3. Status de lo Cerrado / Pendiente / En consulta de viabilidad / En desarrollo / Viable / No viable / Proyecto de Lean.
-        </div>
         <div class="overview-grid" id="resumenIndicadores"></div>
-        <div class="progress-summary" id="avanceGeneralContainer">
-            <div class="progress-summary__label">
-                <span>Avance general del portafolio</span>
-                <strong id="avanceGeneralNumero">0%</strong>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-bar__fill" id="avanceGeneralBar"></div>
-            </div>
-        </div>
+
         <h2>1. Ideas por Proceso y Tipo de Idea</h2>
         <div id="tablaIdeas"></div>
         
@@ -440,6 +427,7 @@
                             idea_en_desarrollo: value(['Idea en desarrollo', 'idea en desarrollo', 'idea_en_desarrollo'], ''),
                             premiacion: value(['Premiación', 'Premiacion', 'premiacion'], ''),
                             responsable_tarea: value(['Responsable tarea', 'responsable tarea', 'responsable_tarea'], ''),
+                            fecha_registro: parseDateValue(value(['Fecha de registro', 'fecha de registro', 'Fecha De Registro', 'FECHA DE REGISTRO', 'fecha_registro', 'fecha_de_registro', 'fecha'], '')),
                             fecha_revision: value(['Fecha revision', 'Fecha revisión', 'fecha_revision'], ''),
                             fecha_fin: value(['Fecha fin', 'fecha_fin'], '')
                         };
@@ -526,7 +514,7 @@ const promises = [];
             XLSX.writeFile(wb, 'Informe_Encuestas_' + new Date().toISOString().slice(0,10) + '.xlsx');
         }
 
-        const procesos = ['Maquillajes','Emulsiones','Hidroalcoholes','Almacén','Cendis','Mantenimiento','Calidad','LEAN','TTCA'];
+        const procesos = ['Maquillajes','Emulsiones','Hidroalcoholes','Almacén','Cendis','Mantenimiento','Calidad','LEAN','TTCA','Otro'];
         const tiposIdea = ['Mejora de proceso','Clima laboral','Ahorro de costos','Seguridad y SST','Calidad','Innovación','Sin clasificar'];
         const statusList = ['Cerrado','Pendiente','En consulta de viabilidad','En desarrollo','Viable','No viable','Proyecto de Lean'];
         const statusEquivalencias = {
@@ -550,7 +538,9 @@ const promises = [];
             'MANTENIMIENTO': 'Mantenimiento',
             'CALIDAD': 'Calidad',
             'LEAN': 'LEAN',
-            'TTCA': 'TTCA'
+            'TTCA': 'TTCA',
+            'OTRO': 'Otro',
+            'OTROS': 'Otro'
         };
         const tipoIdeaEquivalencias = {
             'MEJORA DE PROCESO': 'Mejora de proceso',
@@ -600,6 +590,104 @@ const promises = [];
             return base.length > limite ? base.slice(0, limite - 1) + '…' : base;
         }
 
+        function mostrarInfoCard(titulo, valor, descripcion) {
+            let toast = document.getElementById('card-info-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'card-info-toast';
+                toast.style.position = 'fixed';
+                toast.style.bottom = '20px';
+                toast.style.right = '20px';
+                toast.style.padding = '14px 18px';
+                toast.style.background = 'rgba(30, 58, 138, 0.93)';
+                toast.style.color = '#fff';
+                toast.style.borderRadius = '12px';
+                toast.style.boxShadow = '0 8px 20px rgba(0,0,0,0.25)';
+                toast.style.fontSize = '0.96rem';
+                toast.style.fontWeight = '600';
+                toast.style.maxWidth = '320px';
+                toast.style.zIndex = '10000';
+                toast.style.lineHeight = '1.35';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<strong>${escapeHtml(titulo)}:</strong> ${escapeHtml(valor)}<br><small>${escapeHtml(descripcion)}</small>`;
+            toast.style.display = 'block';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => { toast.style.display = 'none'; }, 3800);
+        }
+
+        function obtenerIdeasPorCategoria(categoria) {
+            const encuestas = window.encuestasCache || [];
+            if (!encuestas.length) return [];
+            let filtrado = [];
+            if (categoria === 'total') {
+                filtrado = encuestas;
+            } else if (categoria === 'en_desarrollo') {
+                filtrado = encuestas.filter(e => {
+                    const estado = normalizarStatus(e.estado || e.estatus || e.Estado || e.Estatus || '');
+                    const avance = normalizarIdeaDesarrollo(e.idea_en_desarrollo || e.ideaEnDesarrollo || '');
+                    return estado === 'En desarrollo' || avance === 'EN DESARROLLO';
+                });
+            } else if (categoria === 'pendiente') {
+                filtrado = encuestas.filter(e => normalizarStatus(e.estado || e.estatus || e.Estado || e.Estatus || '') === 'Pendiente');
+            } else if (categoria === 'premiada') {
+                filtrado = encuestas.filter(e => normalizarPremiacion(e.premiacion || e.Premio || e.premio || '') === 'PREMIADA');
+            } else if (categoria === 'pendiente_premiacion') {
+                filtrado = encuestas.filter(e => normalizarPremiacion(e.premiacion || e.Premio || e.premio || '') === 'PENDIENTE');
+            }
+            return filtrado.map(e => ({
+                consecutivo: e.consecutivo || e.key || 'N/A',
+                nombre: e.nombre_idea || e.nombre || 'sin nombre'
+            })).sort((a,b)=>a.consecutivo.localeCompare(b.consecutivo));
+        }
+
+        function mostrarDetalleIdeas(categoria) {
+            const datos = obtenerIdeasPorCategoria(categoria);
+            const modalId = 'detalle-ideas-modal';
+            let modal = document.getElementById(modalId);
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = modalId;
+                modal.style.position = 'fixed';
+                modal.style.top = '0';
+                modal.style.left = '0';
+                modal.style.right = '0';
+                modal.style.bottom = '0';
+                modal.style.background = 'rgba(15, 23, 42, 0.65)';
+                modal.style.zIndex = '10001';
+                modal.style.display = 'flex';
+                modal.style.alignItems = 'center';
+                modal.style.justifyContent = 'center';
+                modal.innerHTML = `
+                    <div id="detalle-ideas-card" style="width:90%; max-width:640px; max-height:78vh; overflow:auto; background:#fff; border-radius:14px; padding:18px; box-shadow:0 12px 30px rgba(15,23,42,0.28); position:relative;">
+                        <button id="detalle-ideas-close" style="position:absolute; top:12px; right:14px; background:#ef4444; border:none; color:#fff; border-radius:8px; cursor:pointer; padding:6px 10px; font-weight:700;">Cerrar</button>
+                        <h3 id="detalle-ideas-title" style="margin-top:0; color:#1e3a8a;"></h3>
+                        <p id="detalle-ideas-subtitle" style="color:#475569; margin:4px 0 12px 0;"></p>
+                        <ul id="detalle-ideas-list" style="padding-left:18px; margin:0; max-height:60vh; overflow:auto;">
+                        </ul>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                modal.querySelector('#detalle-ideas-close').onclick = () => { modal.style.display = 'none'; };
+                modal.onclick = (event) => {
+                    if (event.target === modal) modal.style.display = 'none';
+                };
+            }
+            const title = modal.querySelector('#detalle-ideas-title');
+            const subtitle = modal.querySelector('#detalle-ideas-subtitle');
+            const list = modal.querySelector('#detalle-ideas-list');
+            let label = '';
+            if (categoria === 'total') label = 'Todas las ideas';
+            if (categoria === 'en_desarrollo') label = 'Ideas en desarrollo';
+            if (categoria === 'pendiente') label = 'Ideas pendientes';
+            if (categoria === 'premiada') label = 'Ideas premiadas';
+            if (categoria === 'pendiente_premiacion') label = 'Ideas con premiación pendiente';
+            title.textContent = label;
+            subtitle.textContent = `${datos.length} idea(s) encontradas`;            
+            list.innerHTML = datos.length ? datos.map(i => `<li><strong>${escapeHtml(i.consecutivo)}</strong> - ${escapeHtml(i.nombre)}</li>`).join('') : '<li>No hay ideas para esta categoría.</li>';
+            modal.style.display = 'flex';
+        }
+
         function normalizarBase(valor) {
             if (!valor) return '';
             return valor
@@ -607,6 +695,28 @@ const promises = [];
                 .replace(/[\u0300-\u036f]/g, '')
                 .toUpperCase()
                 .trim();
+        }
+
+        function parseDateValue(valor) {
+            if (!valor && valor !== 0) return '';
+            const text = String(valor).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+            // Serial numérico de Excel (ej: 42737 → 2017-01-02)
+            const num = Number(text);
+            if (!isNaN(num) && num > 1 && num < 2958466 && /^\d+(\.\d+)?$/.test(text)) {
+                const base = new Date(Date.UTC(1899, 11, 30));
+                const d = new Date(base.getTime() + Math.floor(num) * 86400000);
+                if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+            }
+            // DD/MM/YYYY
+            const slashMatch = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (slashMatch) {
+                const d = new Date(Date.UTC(parseInt(slashMatch[3]), parseInt(slashMatch[2]) - 1, parseInt(slashMatch[1])));
+                if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+            }
+            const date = new Date(text);
+            if (!isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+            return '';
         }
 
         function normalizarArea(valor) {
@@ -729,40 +839,38 @@ const promises = [];
 
             const porcentajeEnDesarrollo = totalIdeas ? Math.round((ideaEnDesarrolloCount / totalIdeas) * 100) : 0;
 
+            const now = new Date();
+            const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+            const ideaMesActual = encuestas.filter(e => {
+                const fecha = parseDateValue(e.fecha_revision || e.fechaRevision || e.fechaRevision || '');
+                return fecha && fecha.startsWith(currentYearMonth);
+            }).length;
+            const porcentajeMesActual = totalIdeas ? Math.round((ideaMesActual / totalIdeas) * 100) : 0;
+
             const container = document.getElementById('resumenIndicadores');
             if (container) {
                 container.innerHTML = `
-                    <div class="overview-card">
+                    <div class="overview-card" onclick="mostrarInfoCard('Total de ideas', ${totalIdeas}, 'Cantidad total de ideas registradas en el sistema.'); mostrarDetalleIdeas('total')">
                         <span>Total de ideas</span>
                         <strong>${totalIdeas}</strong>
                         <small>Encuestas capturadas</small>
                     </div>
-                    <div class="overview-card">
+                    <div class="overview-card" onclick="mostrarInfoCard('Avance general', '${porcentajeEnDesarrollo}%', 'Porcentaje de ideas en estado "en desarrollo".'); mostrarDetalleIdeas('en_desarrollo')">
                         <span>Avance general (idea en desarrollo)</span>
                         <strong>${porcentajeEnDesarrollo}%</strong>
                         <small>${ideaEnDesarrolloCount}/${totalIdeas} en desarrollo</small>
                     </div>
-                    <div class="overview-card">
-                        <span>Ideas cerradas</span>
-                        <strong>${cerradas}</strong>
-                        <small>Estado 'Cerrado'</small>
-                    </div>
-                    <div class="overview-card">
-                        <span>Ideas en estado desarrollo</span>
-                        <strong>${estadoEnDesarrollo}</strong>
-                        <small>Estado 'En desarrollo'</small>
-                    </div>
-                    <div class="overview-card">
+                    <div class="overview-card" onclick="mostrarInfoCard('Ideas en estado pendiente', ${pendientes}, 'Ideas que requieren seguimiento o decisión.'); mostrarDetalleIdeas('pendiente')">
                         <span>Ideas en estado pendiente</span>
                         <strong>${pendientes}</strong>
                         <small>Estado 'Pendiente'</small>
                     </div>
-                    <div class="overview-card">
+                    <div class="overview-card" onclick="mostrarInfoCard('Ideas premiadas', ${premiadas}, 'Ideas que ya han sido premiadas con resultado final.'); mostrarDetalleIdeas('premiada')">
                         <span>Ideas premiadas</span>
                         <strong>${premiadas}</strong>
                         <small>Premiación 'Premiada'</small>
                     </div>
-                    <div class="overview-card">
+                    <div class="overview-card" onclick="mostrarInfoCard('Premiación pendiente', ${pendientesPremiacion}, 'Ideas pendientes del proceso de premiación.'); mostrarDetalleIdeas('pendiente_premiacion')">
                         <span>Premiación pendiente</span>
                         <strong>${pendientesPremiacion}</strong>
                         <small>Premiación 'Pendiente'</small>
@@ -770,8 +878,8 @@ const promises = [];
             }
             const avanceNumero = document.getElementById('avanceGeneralNumero');
             const avanceBar = document.getElementById('avanceGeneralBar');
-            if (avanceNumero) avanceNumero.textContent = `${porcentajeEnDesarrollo}%`;
-            if (avanceBar) avanceBar.style.width = `${Math.min(Math.max(porcentajeEnDesarrollo, 0), 100)}%`;
+            if (avanceNumero) avanceNumero.textContent = `${ideaMesActual}`;
+            if (avanceBar) avanceBar.style.width = `${Math.min(Math.max(porcentajeMesActual, 0), 100)}%`;
 
             const procesosSelect = document.getElementById('filtroAvanceProceso');
             if (procesosSelect) {
