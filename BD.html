@@ -23,10 +23,32 @@
             padding: 32px 18px 32px 18px;
             overflow-x: auto;
             overflow-y: auto;
+            padding-bottom: 24px;
+            scrollbar-width: auto;
+            scrollbar-color: #4f46e5 #cbd5e1;
             height: calc(100vh - 170px);
             position: sticky;
             top: 70px;
             z-index: 1;
+        }
+
+        .tabla-container::-webkit-scrollbar {
+            height: 26px;
+        }
+
+        .tabla-container::-webkit-scrollbar-track {
+            background: #cbd5e1;
+            border-radius: 12px;
+        }
+
+        .tabla-container::-webkit-scrollbar-thumb {
+            background: #4f46e5;
+            border-radius: 12px;
+            border: 4px solid #cbd5e1;
+        }
+
+        .tabla-container::-webkit-scrollbar-thumb:hover {
+            background: #3730a3;
         }
         .back-btn {
             display: inline-flex;
@@ -80,7 +102,7 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        tbody td:nth-child(7) {
+        tbody td:nth-child(8) {
             /* Situación actual */
             max-width: 220px;
             white-space: normal;
@@ -117,17 +139,42 @@
             transform: translateY(-1px);
             box-shadow: 0 7px 18px rgba(99, 102, 241, 0.54);
         }
+        .edit-btn {
+            display: inline-block;
+            margin-left: 4px;
+            font-size: 0.88em;
+            padding: 4px 10px;
+            border: 1px solid #4f46e5;
+            border-radius: 8px;
+            background: #fff;
+            color: #1f2937;
+            cursor: pointer;
+        }
+        .save-btn {
+            display: none;
+            margin-left: 4px;
+            font-size: 0.88em;
+            padding: 4px 10px;
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            background: #f0fdf4;
+            color: #065f46;
+            cursor: pointer;
+        }
+        .edit-btn:hover, .save-btn:hover {
+            opacity: 0.85;
+        }
     </style>
 </head>
 <body>
     <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; margin:10px 2%; gap:10px;">
-        <a href="index.html" class="back-to-form">← Volver</a>
+        <a href="index.html" class="back-to-form"><i class="fa fa-arrow-left" style="margin-right:6px"></i>Volver</a>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-            <span id="db-welcome" style="color:#3749ff; font-weight:700;">Acceso a Base de Datos activo</span>
+            <span id="db-welcome" style="color:#3749ff; font-weight:700;"><i class="fa fa-database" style="margin-right:6px"></i>Acceso a Base de Datos activo</span>
             <input id="filterInput" type="text" placeholder="" style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; width:320px; outline:none;" />
             <span id="filterStatus" style="font-weight:600; color:#1f2937; display:none;"></span>
-            <button id="exportXlsxBtn" style="background:#10b981; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(16, 185, 129, 0.35);">Exportar</button>
-            <button id="informeBtn" style="background:#2563eb; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(37, 99, 235, 0.35);">Informe</button>
+            <button id="exportXlsxBtn" style="background:#10b981; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(16, 185, 129, 0.35);"><i class="fa fa-file-excel" style="margin-right:7px"></i>Exportar</button>
+            <button id="informeBtn" style="background:#2563eb; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(37, 99, 235, 0.35);"><i class="fa fa-chart-bar" style="margin-right:7px"></i>Informe</button>
         </div>
     </div>
     <div class="tabla-container">
@@ -140,6 +187,7 @@
             <thead>
                 <tr>
                     <th>Idea N°</th>
+                    <th>Fecha de registro</th>
                     <th>Nombre de la idea</th>
                     <th>Nombres y apellidos</th>
                     <th>Numero de documento</th>
@@ -162,7 +210,7 @@
                 </tr>
             </thead>
             <tbody id="tbody-encuestas">
-                <tr><td colspan="19">Cargando datos...</td></tr>
+                <tr><td colspan="21">Cargando datos...</td></tr>
             </tbody>
         </table>
     </div>
@@ -227,25 +275,42 @@
 
         function parseDateValue(valor) {
             if (valor === null || valor === undefined || valor === '') return '';
-            if (typeof valor === 'number' || (!isNaN(valor) && valor.toString().trim() !== '' && !/^\d{4}-\d{2}-\d{2}$/.test(valor.toString()))) {
-                const num = Number(valor);
-                if (!isNaN(num) && num > 10) {
-                    // Excel serial date (1900-based) y sin corregir 1900-leap bug
-                    const baseDate = new Date(Date.UTC(1899, 11, 30));
-                    const date = new Date(baseDate.getTime() + (num * 24 * 60 * 60 * 1000));
-                    if (!isNaN(date.getTime())) {
-                        return date.toISOString().slice(0,10);
-                    }
+            const str = String(valor).trim();
+            // Ya en formato YYYY-MM-DD
+            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+            // Serial numérico de Excel (número o string numérico puro, ej: 42737)
+            if (/^\d+(\.\d+)?$/.test(str)) {
+                const num = Number(str);
+                if (!isNaN(num) && num > 1 && num < 2958466) {
+                    const base = new Date(Date.UTC(1899, 11, 30));
+                    const d = new Date(base.getTime() + Math.floor(num) * 86400000);
+                    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
                 }
             }
-            const str = String(valor).trim();
-            // Si ya está en YYYY-MM-DD
-            if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
-            // Si es con / o formateado por fecha javascript
-            const fecha = new Date(str);
-            if (!isNaN(fecha.getTime())) {
-                return fecha.toISOString().slice(0,10);
+            // Valor numérico nativo de JS (ya es number)
+            if (typeof valor === 'number' && valor > 1 && valor < 2958466) {
+                const base = new Date(Date.UTC(1899, 11, 30));
+                const d = new Date(base.getTime() + Math.floor(valor) * 86400000);
+                if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
             }
+            // Fechas mal guardadas en Firebase como año-extendido: +042737-01
+            const mangledMatch = str.match(/^\+0*(\d{4,6})-\d{2}$/);
+            if (mangledMatch) {
+                const serial = parseInt(mangledMatch[1]);
+                if (serial > 1 && serial < 2958466) {
+                    const base = new Date(Date.UTC(1899, 11, 30));
+                    const d = new Date(base.getTime() + serial * 86400000);
+                    if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+                }
+            }
+            // DD/MM/YYYY
+            const slashMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+            if (slashMatch) {
+                const d = new Date(Date.UTC(parseInt(slashMatch[3]), parseInt(slashMatch[2]) - 1, parseInt(slashMatch[1])));
+                if (!isNaN(d.getTime())) return d.toISOString().slice(0, 10);
+            }
+            const fecha = new Date(str);
+            if (!isNaN(fecha.getTime())) return fecha.toISOString().slice(0, 10);
             return str;
         }
 
@@ -303,8 +368,20 @@
             const rows = getPagedData().map(row => {
                 const ideaNameRaw = normalizeValue(row, 'nombre_idea', 'name_idea', 'Nombre de la idea', 'nombre_de_la_idea');
                 const ideaName = ideaNameRaw && String(ideaNameRaw).trim() ? String(ideaNameRaw).trim() : getIdeaNameFromProposal(row.propuesta || row.propuesta_text);
+                const fechaRegistro = parseDateValue(normalizeValue(
+                    row,
+                    'fecha_registro',
+                    'fechaRegistro',
+                    'fecha_de_registro',
+                    'Fecha de registro',
+                    'fecha de registro',
+                    'Fecha de Registro',
+                    'FECHA DE REGISTRO',
+                    'fecha'
+                ));
                 return `<tr data-key="${row.key}">
                     <td>${row.consecutivo || row.key || ''}</td>
+                    <td>${fechaRegistro}</td>
                     <td>${ideaName}</td>
                     <td>${normalizeValue(row, 'nombre', 'name', 'nombres_y_apellidos', 'Nombres y apellidos')}</td>
                     <td>${normalizeValue(row, 'documento', 'numero_de_documento', 'Numero de documento')}</td>
@@ -330,7 +407,13 @@
                 </tr>`;
             });
             tbody.innerHTML = rows.join('');
-            tbody.querySelectorAll('tr').forEach(tr => setRowEditable(tr, false));
+            tbody.querySelectorAll('tr').forEach(tr => {
+                setRowEditable(tr, false);
+                const eBtn = tr.querySelector('.edit-btn');
+                const sBtn = tr.querySelector('.save-btn');
+                if (eBtn) eBtn.style.display = 'inline-block';
+                if (sBtn) sBtn.style.display = 'none';
+            });
             attachRowButtons();
             updatePagination();
         }
@@ -340,7 +423,7 @@
             if (!data) {
                 currentData = [];
                 currentPage = 1;
-                tbody.innerHTML = '<tr><td colspan="19">No hay registros en la base de datos.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="21">No hay registros en la base de datos.</td></tr>';
                 updatePagination();
                 return;
             }
@@ -361,23 +444,38 @@
         }
 
         function setRowEditable(tr, editable) {
+            const editBtn = tr.querySelector('.edit-btn');
+            const saveBtn = tr.querySelector('.save-btn');
+            if (editBtn) editBtn.style.display = editable ? 'none' : 'inline-block';
+            if (saveBtn) saveBtn.style.display = editable ? 'inline-block' : 'none';
+
             const cells = Array.from(tr.querySelectorAll('td'));
-            const areaOptions = ['Maquillajes','Emulsiones','Hidroalcoholes','Almacén','Cendis','Mantenimiento','Calidad','LEAN','TTCA'];
-            for (let i = 1; i < cells.length - 1; i++) {
-                if (i === 5) { // area column
+            const areaOptions = ['MAQUILLAJES','EMULSIONES','HIDROALCOHOLES','ALMACÉN','CENDIS','MANTENIMIENTO','CALIDAD','LEAN','TTCA','OTRO'];
+            for (let i = 2; i < cells.length - 1; i++) {
+                if (i === 6) { // area column
                     if (editable) {
-                        const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
+                        const current = (cells[i].getAttribute('data-full-text') || cells[i].innerText.trim()).toUpperCase();
                         const currentTokens = current.split(/[,;\n]/).map(t => t.trim()).filter(Boolean);
                         const select = document.createElement('select');
                         select.style.width = '100%';
+                        let selected = false;
                         for (const opt of areaOptions) {
                             const option = document.createElement('option');
                             option.value = opt;
                             option.text = opt;
                             if (currentTokens.some(t => t.toUpperCase() === opt.toUpperCase())) {
                                 option.selected = true;
+                                selected = true;
                             }
                             select.appendChild(option);
+                        }
+                        const rawCurrent = currentTokens.join(', ');
+                        if (rawCurrent && !selected) {
+                            const fallback = document.createElement('option');
+                            fallback.value = rawCurrent;
+                            fallback.text = rawCurrent;
+                            fallback.selected = true;
+                            select.appendChild(fallback);
                         }
                         cells[i].innerHTML = '';
                         cells[i].appendChild(select);
@@ -397,10 +495,10 @@
                     continue;
                 }
 
-                if (i === 12) { // estado column
+                if (i === 13) { // estado column
                     const estadoOptions = ['CERRADA', 'EN CONSULTA DE VIABILIDAD', 'IMPLEMENTADA', 'NO VIABLE', 'PROYECTO LEAN', 'UNIFICADA', 'VIABLE'];
                     if (editable) {
-                        const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
+                        const current = (cells[i].getAttribute('data-full-text') || cells[i].innerText.trim()).toUpperCase();
                         const select = document.createElement('select');
                         select.style.width = '100%';
 
@@ -411,14 +509,23 @@
                         emptyOption.selected = true;
                         select.appendChild(emptyOption);
 
+                        let selected = false;
                         for (const opt of estadoOptions) {
                             const option = document.createElement('option');
                             option.value = opt;
                             option.text = opt;
                             if (current && opt.toUpperCase() === current.toUpperCase()) {
                                 option.selected = true;
+                                selected = true;
                             }
                             select.appendChild(option);
+                        }
+                        if (current && !selected) {
+                            const fallback = document.createElement('option');
+                            fallback.value = current;
+                            fallback.text = current;
+                            fallback.selected = true;
+                            select.appendChild(fallback);
                         }
                         cells[i].innerHTML = '';
                         cells[i].appendChild(select);
@@ -438,7 +545,7 @@
                     continue;
                 }
 
-                if (i === 6) { // situación actual
+                if (i === 7) { // situación actual
                     if (editable) {
                         cells[i].textContent = cells[i].getAttribute('data-full-text') || cells[i].innerText;
                         cells[i].contentEditable = 'true';
@@ -446,7 +553,7 @@
                         cells[i].style.overflow = 'auto';
                         cells[i].style.maxHeight = '120px';
                     } else {
-                        const full = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        const full = (cells[i].innerText || '').trim() || cells[i].getAttribute('data-full-text') || '';
                         cells[i].setAttribute('data-full-text', full);
                         cells[i].textContent = truncarTexto(full);
                         cells[i].contentEditable = 'false';
@@ -460,7 +567,7 @@
                     continue;
                 }
 
-                if (i === 7) { // propuesta
+                if (i === 8) { // propuesta
                     if (editable) {
                         cells[i].textContent = cells[i].getAttribute('data-full-text') || cells[i].innerText;
                         cells[i].contentEditable = 'true';
@@ -468,7 +575,7 @@
                         cells[i].style.overflow = 'auto';
                         cells[i].style.maxHeight = '120px';
                     } else {
-                        const full = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        const full = (cells[i].innerText || '').trim() || cells[i].getAttribute('data-full-text') || '';
                         cells[i].setAttribute('data-full-text', full);
                         cells[i].textContent = truncarTexto(full);
                         cells[i].contentEditable = 'false';
@@ -482,7 +589,7 @@
                     continue;
                 }
 
-                if (i === 8) { // justificacion
+                if (i === 9) { // justificacion
                     if (editable) {
                         cells[i].textContent = cells[i].getAttribute('data-full-text') || cells[i].innerText;
                         cells[i].contentEditable = 'true';
@@ -490,7 +597,7 @@
                         cells[i].style.overflow = 'auto';
                         cells[i].style.maxHeight = '120px';
                     } else {
-                        const full = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        const full = (cells[i].innerText || '').trim() || cells[i].getAttribute('data-full-text') || '';
                         cells[i].setAttribute('data-full-text', full);
                         cells[i].textContent = truncarTexto(full);
                         cells[i].contentEditable = 'false';
@@ -504,7 +611,7 @@
                     continue;
                 }
 
-                if (i === 13) { // comentarios lean
+                if (i === 14) { // comentarios lean
                     if (editable) {
                         cells[i].textContent = cells[i].getAttribute('data-full-text') || cells[i].innerText;
                         cells[i].contentEditable = 'true';
@@ -512,7 +619,7 @@
                         cells[i].style.overflow = 'auto';
                         cells[i].style.maxHeight = '120px';
                     } else {
-                        const full = cells[i].getAttribute('data-full-text') || cells[i].innerText;
+                        const full = (cells[i].innerText || '').trim() || cells[i].getAttribute('data-full-text') || '';
                         cells[i].setAttribute('data-full-text', full);
                         cells[i].textContent = truncarTexto(full);
                         cells[i].contentEditable = 'false';
@@ -526,10 +633,10 @@
                     continue;
                 }
 
-                if (i === 14) { // idea en desarrollo
+                if (i === 15) { // idea en desarrollo
                     const ideaDevOptions = ['CON FEED BACK', 'IDEA EN DESARROLLO', 'IMPLEMENTADA', 'PENDIENTE FEED BACK'];
                     if (editable) {
-                        const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
+                        const current = (cells[i].getAttribute('data-full-text') || cells[i].innerText.trim()).toUpperCase();
                         const select = document.createElement('select');
                         select.style.width = '100%';
 
@@ -539,14 +646,23 @@
                         emptyOption.selected = true;
                         select.appendChild(emptyOption);
 
+                        let selected = false;
                         for (const opt of ideaDevOptions) {
                             const option = document.createElement('option');
                             option.value = opt;
                             option.text = opt;
                             if (current && opt.toUpperCase() === current.toUpperCase()) {
                                 option.selected = true;
+                                selected = true;
                             }
                             select.appendChild(option);
+                        }
+                        if (current && !selected) {
+                            const fallback = document.createElement('option');
+                            fallback.value = current;
+                            fallback.text = current;
+                            fallback.selected = true;
+                            select.appendChild(fallback);
                         }
                         cells[i].innerHTML = '';
                         cells[i].appendChild(select);
@@ -566,10 +682,10 @@
                     continue;
                 }
 
-                if (i === 15) { // premiación
+                if (i === 16) { // premiación
                     const premiacionOptions = ['CERRADA', 'IDEA EN DESARROLLO', 'IMPLEMENTADA', 'PENDIENTE FEED BACK', 'PENDIENTE PREMIACION', 'PREMIADA', 'PROPUESTA DUPLICADA'];
                     if (editable) {
-                        const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
+                        const current = (cells[i].getAttribute('data-full-text') || cells[i].innerText.trim()).toUpperCase();
                         const select = document.createElement('select');
                         select.style.width = '100%';
 
@@ -579,14 +695,23 @@
                         emptyOption.selected = true;
                         select.appendChild(emptyOption);
 
+                        let selected = false;
                         for (const opt of premiacionOptions) {
                             const option = document.createElement('option');
                             option.value = opt;
                             option.text = opt;
                             if (current && opt.toUpperCase() === current.toUpperCase()) {
                                 option.selected = true;
+                                selected = true;
                             }
                             select.appendChild(option);
+                        }
+                        if (current && !selected) {
+                            const fallback = document.createElement('option');
+                            fallback.value = current;
+                            fallback.text = current;
+                            fallback.selected = true;
+                            select.appendChild(fallback);
                         }
                         cells[i].innerHTML = '';
                         cells[i].appendChild(select);
@@ -606,7 +731,7 @@
                     continue;
                 }
 
-                if (i === 17 || i === 18) { // fecha revisión / fecha fin
+                if (i === 18 || i === 19) { // fecha revisión / fecha fin
                     if (editable) {
                         const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
                         const input = document.createElement('input');
@@ -650,59 +775,104 @@
             });
         }
 
+        function cancelRowEdit() {
+            const activeSaveBtn = tbody.querySelector('tr .save-btn');
+            if (!activeSaveBtn) return;
+            const isVisible = window.getComputedStyle(activeSaveBtn).display !== 'none';
+            if (!isVisible) return;
+            const tr = activeSaveBtn.closest('tr');
+            if (!tr) return;
+
+            // Re-render la página actual para descartar los cambios pendientes.
+            renderPage();
+            showNotification('Edición cancelada (ESC).', true);
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' || event.key === 'Esc') {
+                cancelRowEdit();
+            }
+        });
+
         function saveRow(tr) {
             const key = tr.dataset.key;
             if (!key) return;
             const cells = tr.querySelectorAll('td');
-            const areaCell = cells[5];
+            const areaCell = cells[6];
             const areaSelect = areaCell.querySelector('select');
             const areaValue = areaSelect ? areaSelect.value.trim() : areaCell.innerText.trim();
 
-            const estadoCell = cells[12];
+            const estadoCell = cells[13];
             const estadoSelect = estadoCell.querySelector('select');
             const estadoValue = estadoSelect ? estadoSelect.value.trim() : estadoCell.innerText.trim();
 
-            const ideaDevCell = cells[14];
+            const ideaDevCell = cells[15];
             const ideaDevSelect = ideaDevCell.querySelector('select');
             const ideaDevValue = ideaDevSelect ? ideaDevSelect.value.trim() : ideaDevCell.innerText.trim();
 
-            const premiacionCell = cells[15];
+            const premiacionCell = cells[16];
             const premiacionSelect = premiacionCell.querySelector('select');
             const premiacionValue = premiacionSelect ? premiacionSelect.value.trim() : premiacionCell.innerText.trim();
 
-            const fechaRevisionCell = cells[17];
+            const fechaRevisionCell = cells[18];
             const fechaRevisionInput = fechaRevisionCell.querySelector('input[type="date"]');
             const fechaRevisionValue = parseDateValue(fechaRevisionInput ? fechaRevisionInput.value.trim() : fechaRevisionCell.innerText.trim());
 
-            const fechaFinCell = cells[18];
+            const fechaFinCell = cells[19];
             const fechaFinInput = fechaFinCell.querySelector('input[type="date"]');
             const fechaFinValue = parseDateValue(fechaFinInput ? fechaFinInput.value.trim() : fechaFinCell.innerText.trim());
 
             const updated = {
-                nombre_idea: cells[1].innerText.trim(),
-                nombre: cells[2].innerText.trim(),
-                documento: cells[3].innerText.trim(),
-                telefono: cells[4].innerText.trim(),
+                nombre_idea: cells[2].innerText.trim(),
+                nombre: cells[3].innerText.trim(),
+                documento: cells[4].innerText.trim(),
+                telefono: cells[5].innerText.trim(),
                 area: areaValue,
-                situacion: cells[6].innerText.trim(),
-                propuesta: cells[7].innerText.trim(),
-                justificacion: cells[8].innerText.trim(),
+                situacion: cells[7].innerText.trim(),
+                propuesta: cells[8].innerText.trim(),
+                justificacion: cells[9].innerText.trim(),
                 estado: estadoValue,
                 idea_en_desarrollo: ideaDevValue,
                 premiacion: premiacionValue,
-                correo: cells[9].innerText.trim(),
-                tipo_mejora: cells[10].innerText.split(',').map(v => v.trim()).filter(Boolean),
-                tipo_idea: cells[11].innerText.split(',').map(v => v.trim()).filter(Boolean),
-                comentarios_lean: cells[13].innerText.trim(),
-                responsable_tarea: cells[16].innerText.trim(),
+                correo: cells[10].innerText.trim(),
+                tipo_mejora: cells[11].innerText.split(',').map(v => v.trim()).filter(Boolean),
+                tipo_idea: cells[12].innerText.split(',').map(v => v.trim()).filter(Boolean),
+                comentarios_lean: cells[14].innerText.trim(),
+                responsable_tarea: cells[17].innerText.trim(),
                 fecha_revision: fechaRevisionValue,
                 fecha_fin: fechaFinValue,
             };
 
+            const filterText = filterInput ? filterInput.value.toLowerCase().trim() : '';
             db.ref('encuestas/' + key).update(updated).then(() => {
+                const foundIdx = currentData.findIndex(item => item.key === key);
+                if (foundIdx >= 0) {
+                    currentData[foundIdx] = { ...currentData[foundIdx], ...updated };
+                }
+                if (filteredData) {
+                    const updatedRow = foundIdx >= 0 ? currentData[foundIdx] : { key, ...updated };
+                    if (rowMatches(updatedRow, filterText)) {
+                        const fIdx = filteredData.findIndex(item => item.key === key);
+                        if (fIdx >= 0) {
+                            filteredData[fIdx] = { ...filteredData[fIdx], ...updated };
+                        } else {
+                            filteredData.push(updatedRow);
+                        }
+                    } else {
+                        filteredData = filteredData.filter(item => item.key !== key);
+                    }
+                }
+
                 setRowEditable(tr, false);
                 tr.querySelector('.edit-btn').style.display = 'inline-block';
                 tr.querySelector('.save-btn').style.display = 'none';
+
+                if (filterText) {
+                    applyFilter();
+                } else {
+                    renderPage();
+                }
+
                 showNotification('Registro guardado con éxito.', true);
             }).catch(error => {
                 console.error('Error al guardar fila:', error);
@@ -737,7 +907,7 @@
         }
 
         function showError(message) {
-            tbody.innerHTML = `<tr><td colspan="19" style="color:red; font-weight:bold;">Error al cargar datos: ${message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="21" style="color:red; font-weight:bold;">Error al cargar datos: ${message}</td></tr>`;
         }
 
         db.ref('encuestas').orderByKey().on('value', renderEncuestasList, (error) => {
@@ -766,14 +936,19 @@
         }
 
         function highlightTable(filterValue) {
-            const regex = new RegExp('(' + escapeRegExp(filterValue) + ')', 'gi');
+            const regex = filterValue ? new RegExp('(' + escapeRegExp(filterValue) + ')', 'gi') : null;
             tbody.querySelectorAll('tr').forEach((tr) => {
                 tr.querySelectorAll('td').forEach((cell) => {
-                    const rawText = cell.textContent;
-                    if (!filterValue) {
-                        cell.textContent = rawText;
+                    // No tocar la celda de acciones para conservar botones y eventos
+                    if (cell.querySelector('button')) return;
+
+                    const original = cell.dataset.rawText !== undefined ? cell.dataset.rawText : cell.textContent;
+                    cell.dataset.rawText = original;
+
+                    if (!regex) {
+                        cell.textContent = original;
                     } else {
-                        cell.innerHTML = rawText.replace(regex, '<mark style="background:#fff176;color:#000;padding:0 2px;border-radius:2px;">$1</mark>');
+                        cell.innerHTML = original.replace(regex, '<mark style="background:#fff176;color:#000;padding:0 2px;border-radius:2px;">$1</mark>');
                     }
                 });
             });
@@ -785,7 +960,7 @@
             if (!filterValue) return true;
             const haystack = [
                 row.consecutivo, row.nombre_idea, row.nombre, row.documento, row.telefono,
-                row.area, row.situacion, row.propuesta, row.justificacion, row.correo,
+                row.fecha, row.fecha_registro, row.area, row.situacion, row.propuesta, row.justificacion, row.correo,
                 Array.isArray(row.tipo_mejora) ? row.tipo_mejora.join(' ') : row.tipo_mejora,
                 Array.isArray(row.tipo_idea) ? row.tipo_idea.join(' ') : row.tipo_idea,
                 row.estado, row.comentarios_lean, row.idea_en_desarrollo,
@@ -796,6 +971,15 @@
 
         function applyFilter() {
             const filterValue = filterInput ? filterInput.value.toLowerCase().trim() : '';
+
+            // reset temporal de edición siempre que se inicia un filtro
+            tbody.querySelectorAll('tr').forEach(tr => {
+                setRowEditable(tr, false);
+                const editBtn = tr.querySelector('.edit-btn');
+                const saveBtn = tr.querySelector('.save-btn');
+                if (editBtn) editBtn.style.display = 'inline-block';
+                if (saveBtn) saveBtn.style.display = 'none';
+            });
 
             if (filterValue === '') {
                 filteredData = null;
@@ -843,11 +1027,22 @@
             const wb = XLSX.utils.book_new();
 
             // Definir encabezados exactos
-            const headers = ['Idea N°','Nombre de la idea','Nombres y apellidos','Numero de documento','Celular','Area','Situación actual','Propuesta','Justificacion','Correo electronico','Tipo de mejora','Tipo de idea','Estado','Comentarios Lean','Idea en desarrollo','Premiación','Responsable tarea','Fecha revisión','Fecha fin'];
+            const headers = ['Idea N°','Fecha de registro','Nombre de la idea','Nombres y apellidos','Numero de documento','Celular','Area','Situación actual','Propuesta','Justificacion','Correo electronico','Tipo de mejora','Tipo de idea','Estado','Comentarios Lean','Idea en desarrollo','Premiación','Responsable tarea','Fecha revisión','Fecha fin'];
 
             const csvData = currentData.map(row => {
                 return [
                     row.consecutivo || row.key || '',
+                    parseDateValue(
+                        row.fecha_registro ||
+                        row.fechaRegistro ||
+                        row.fecha_de_registro ||
+                        row['Fecha de registro'] ||
+                        row['fecha de registro'] ||
+                        row['Fecha de Registro'] ||
+                        row['FECHA DE REGISTRO'] ||
+                        row.fecha ||
+                        ''
+                    ),
                     row.nombre_idea || '',
                     row.nombre || '',
                     row.documento || '',
@@ -884,7 +1079,7 @@
             }
 
             // Estilo de datos y anchos
-            const colWidths = [9, 25, 22, 18, 14, 13, 30, 32, 28, 24, 18, 18, 12, 24, 18, 14, 20, 14, 12];
+            const colWidths = [9, 14, 25, 22, 18, 14, 13, 30, 32, 28, 24, 18, 18, 12, 24, 18, 14, 20, 14, 12];
             ws['!cols'] = colWidths.map(w => ({wpx: w * 7}));
 
             for (let R = 1; R <= range.e.r; ++R) {
