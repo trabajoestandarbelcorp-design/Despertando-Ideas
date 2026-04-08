@@ -1225,7 +1225,9 @@
                 <label><input type="radio" name="area" value="Calidad"> Calidad</label>
                 <label><input type="radio" name="area" value="LEAN"> LEAN</label>
                 <label><input type="radio" name="area" value="TTCA"> TTCA</label>
+                <label><input type="radio" name="area" value="Otro"> Otro</label>
             </div>
+            <input type="text" id="area_otro" name="area_otro" placeholder="Especifica el área" style="display:none; margin-top:10px;" maxlength="40">
             <label for="situacion">6. Situación actual: ¿Cuál es la situación que vamos a mejorar?</label>
             <textarea id="situacion" name="situacion" rows="2" required oninput="handleTextareaInput(this)"></textarea>
             <label for="propuesta">7. Propuesta: Descripción detallada de la idea especificando nombre de producto/proceso</label>
@@ -1262,7 +1264,7 @@
                 <label><input type="checkbox" name="tipo_idea" value="Calidad"> Calidad</label>
                 <label><input type="checkbox" name="tipo_idea" value="Innovación"> Innovación</label>
             </div>
-            <button type="submit" class="submit-btn">Enviar propuesta</button>
+            <button type="submit" class="submit-btn"><i class="fa fa-paper-plane" style="margin-right:8px"></i>Enviar propuesta</button>
         </form>
         <div class="footer" id="contacto">
             Deja un legado positivo; tu huella es invaluable para nuestro camino.<br><br>
@@ -1360,6 +1362,20 @@
             console.warn('Formulario de encuesta no encontrado.');
             return;
         }
+        const areaRadios = form.querySelectorAll('input[name="area"]');
+        const areaOtroInput = form.querySelector('#area_otro');
+
+        function syncAreaOtroState() {
+            if (!areaOtroInput) return;
+            const selectedArea = form.querySelector('input[name="area"]:checked');
+            const showOtro = selectedArea && selectedArea.value === 'Otro';
+            areaOtroInput.style.display = showOtro ? 'block' : 'none';
+            areaOtroInput.required = !!showOtro;
+            if (!showOtro) areaOtroInput.value = '';
+        }
+
+        areaRadios.forEach(radio => radio.addEventListener('change', syncAreaOtroState));
+        syncAreaOtroState();
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -1367,19 +1383,24 @@
             const correoLocal = form.correo_local.value.trim();
             const correoDominio = form.correo_dominio.value.trim();
             const correoCompleto = (correoLocal && correoDominio) ? `${correoLocal}@${correoDominio}` : '';
+            const selectedArea = form.querySelector('input[name="area"]:checked');
+            const areaValue = selectedArea ? selectedArea.value : '';
+            const areaOtroValue = form.area_otro ? form.area_otro.value.trim() : '';
+            const areaFinal = areaValue === 'Otro' ? areaOtroValue : areaValue;
 
             const data = {
                 nombre: form.nombre.value.trim(),
                 documento: form.documento.value.trim(),
                 nombre_idea: form.nombre_idea.value.trim(),
                 telefono: form.telefono.value.trim(),
-                area: form.area.value,
+                area: areaFinal,
                 situacion: form.situacion.value.trim(),
                 propuesta: form.propuesta.value.trim(),
                 justificacion: form.justificacion.value.trim(),
                 correo: correoCompleto,
                 tipo_mejora: Array.from(form.querySelectorAll('input[name="tipo_mejora"]:checked')).map(cb => cb.value),
                 tipo_idea: Array.from(form.querySelectorAll('input[name="tipo_idea"]:checked')).map(cb => cb.value),
+                fecha_registro: new Date().toISOString().slice(0, 10),
                 fecha: new Date().toISOString().slice(0, 10)
             };
 
@@ -1394,6 +1415,7 @@
                 .then(() => {
                     console.log('guardarEncuesta exitoso');
                     form.reset();
+                    syncAreaOtroState();
                     mostrarMensaje('¡Propuesta enviada correctamente!', true);
                 })
                 .catch(error => {
