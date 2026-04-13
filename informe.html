@@ -307,16 +307,11 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Informe de Encuestas</h1>
+            <h1>Panel de Innovación y Gestión de Ideas</h1>
         </div>
         <div class="banner">Panel de resultados y análisis</div>
         <button class="btn-volver" onclick="window.location.href='BD.html'"><i class="fa fa-arrow-left" style="margin-right:8px"></i>Volver</button>
         <button class="btn-export" onclick="exportInformeExcel()"><i class="fa fa-file-excel" style="margin-right:8px"></i>Exportar</button>
-        <div style="margin-top:4px; display:flex; gap:8px; align-items:center;">
-            <input id="excelUpload" type="file" accept=".xlsx,.xls" style="padding:6px; border:1px solid #ccc; border-radius:8px;" />
-            <button id="uploadExcelBtn" style="background:#2563eb; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700;">Subir Excel a Firebase</button>
-            <span id="uploadStatus" style="font-weight:600; color:#334155;"></span>
-        </div>
         <div class="overview-grid" id="resumenIndicadores"></div>
 
         <h2>1. Ideas por Proceso y Tipo de Idea</h2>
@@ -325,11 +320,10 @@
         <h2>2. Avance de Ideas</h2>
         <!-- Sección de filtros y tabla de avance eliminada según petición -->
         <div class="chart-container">
-            <div class="chart-title">Distribución por Estado (Avance de Ideas)</div>
+            <div class="chart-title">Status propuestas</div>
             <div id="chartAvanceEstado" style="padding:14px;"></div>
         </div>
         <h2>3. Ideas por Área</h2>
-        <div id="tablaStatus"></div>
         <div class="chart-container">
             <div class="chart-title">Distribución por Área</div>
             <div id="chartStatus" style="padding:12px;"></div>
@@ -422,10 +416,10 @@
                             correo: value(['Correo electronico', 'Correo electrónico', 'correo', 'email'], ''),
                             tipo_mejora: value(['Tipo de mejora', 'tipo de mejora', 'tipo_mejora'], ''),
                             tipo_idea: value(['Tipo de idea', 'tipo de idea', 'tipo_idea'], ''),
-                            estado: value(['Estado', 'estado'], ''),
+                            estado: value(['Estado de viabilidad', 'estado de viabilidad', 'Estado', 'estado'], ''),
                             comentarios_lean: value(['Comentarios Lean', 'comentarios lean', 'comentarios_lean'], ''),
-                            idea_en_desarrollo: value(['Idea en desarrollo', 'idea en desarrollo', 'idea_en_desarrollo'], ''),
-                            premiacion: value(['Premiación', 'Premiacion', 'premiacion'], ''),
+                            idea_en_desarrollo: value(['Status propuesta','Status Propuesta','status propuesta','Status propuesta','Idea en desarrollo', 'idea en desarrollo', 'idea_en_desarrollo'], ''),
+                            premiacion: value(['Status Feed back','Status feed back','StatusFeedBack','Premiación', 'Premiacion', 'premiacion'], ''),
                             responsable_tarea: value(['Responsable tarea', 'responsable tarea', 'responsable_tarea'], ''),
                             fecha_registro: parseDateValue(value(['Fecha de registro', 'fecha de registro', 'Fecha De Registro', 'FECHA DE REGISTRO', 'fecha_registro', 'fecha_de_registro', 'fecha'], '')),
                             fecha_revision: value(['Fecha revision', 'Fecha revisión', 'fecha_revision'], ''),
@@ -500,10 +494,10 @@ const promises = [];
                 'Correo electrónico': r.correo || '',
                 'Tipo de mejora': r.tipo_mejora || '',
                 'Tipo de idea': r.tipo_idea || '',
-                'Estado': r.estado || '',
+                'Estado de viabilidad': r.estado || '',
                 'Comentarios Lean': r.comentarios_lean || '',
-                'Idea en desarrollo': r.idea_en_desarrollo || '',
-                'Premiación': r.premiacion || '',
+                'Status propuesta': r.idea_en_desarrollo || '',
+                'Status Feed back': r.premiacion || '',
                 'Responsable tarea': r.responsable_tarea || '',
                 'Fecha revisión': r.fecha_revision || '',
                 'Fecha fin': r.fecha_fin || ''
@@ -516,7 +510,7 @@ const promises = [];
 
         const procesos = ['Maquillajes','Emulsiones','Hidroalcoholes','Almacén','Cendis','Mantenimiento','Calidad','LEAN','TTCA','Otro'];
         const tiposIdea = ['Mejora de proceso','Clima laboral','Ahorro de costos','Seguridad y SST','Calidad','Innovación','Sin clasificar'];
-        const statusList = ['Cerrado','Pendiente','En consulta de viabilidad','En desarrollo','Viable','No viable','Proyecto de Lean'];
+        const statusList = ['Cerrada','Premiada','Idea en desarrollo','Pendiente por premiar','En consulta de viabilidad'];
         const statusEquivalencias = {
             'CERRADO': 'Cerrado',
             'PENDIENTE': 'Pendiente',
@@ -525,6 +519,14 @@ const promises = [];
             'VIABLE': 'Viable',
             'NO VIABLE': 'No viable',
             'PROYECTO DE LEAN': 'Proyecto de Lean'
+        };
+        const statusPropuestaEquivalencias = {
+            'CERRADA': 'Cerrada',
+            'PREMIADA': 'Premiada',
+            'IDEA EN DESARROLLO': 'Idea en desarrollo',
+            'PENDIENTE POR PREMIAR': 'Pendiente por premiar',
+            'PENDIENTE FEED BACK': 'Pendiente por premiar',
+            'EN CONSULTA DE VIABILIDAD': 'En consulta de viabilidad'
         };
         const areaEquivalencias = {
             'MAQUILLAJES': 'Maquillajes',
@@ -678,10 +680,10 @@ const promises = [];
             const list = modal.querySelector('#detalle-ideas-list');
             let label = '';
             if (categoria === 'total') label = 'Todas las ideas';
-            if (categoria === 'en_desarrollo') label = 'Ideas en desarrollo';
+            if (categoria === 'en_desarrollo') label = 'Ideas con Status propuesta';
             if (categoria === 'pendiente') label = 'Ideas pendientes';
             if (categoria === 'premiada') label = 'Ideas premiadas';
-            if (categoria === 'pendiente_premiacion') label = 'Ideas con premiación pendiente';
+            if (categoria === 'pendiente_premiacion') label = 'Ideas con Status Feed back pendiente';
             title.textContent = label;
             subtitle.textContent = `${datos.length} idea(s) encontradas`;            
             list.innerHTML = datos.length ? datos.map(i => `<li><strong>${escapeHtml(i.consecutivo)}</strong> - ${escapeHtml(i.nombre)}</li>`).join('') : '<li>No hay ideas para esta categoría.</li>';
@@ -732,6 +734,12 @@ const promises = [];
         function normalizarStatus(valor) {
             const llave = normalizarBase(valor);
             return statusEquivalencias[llave] || (valor ? valor.trim() : '');
+        }
+
+        function normalizarStatusPropuesta(valor) {
+            if (!valor) return '';
+            const llave = normalizarBase(valor);
+            return statusPropuestaEquivalencias[llave] || (valor ? valor.trim() : '');
         }
 
         function normalizarIdeaDesarrollo(valor) {
@@ -823,7 +831,7 @@ const promises = [];
             encuestas.forEach(enc => {
                 const statusValue = enc.estado || enc.estatus || enc.Estado || enc.Estatus || '';
                 const status = normalizarStatus(statusValue);
-                const avanceStatus = normalizarIdeaDesarrollo(enc.idea_en_desarrollo || enc.ideaEnDesarrollo || '');
+                const avanceStatus = normalizarStatusPropuesta(enc.idea_en_desarrollo || enc.ideaEnDesarrollo || '');
                 const premiacionStatus = normalizarPremiacion(enc.premiacion || enc.Premio || enc.premio || '');
 
                 if (status === 'Cerrado') cerradas++;
@@ -831,7 +839,7 @@ const promises = [];
                 if (status === 'En desarrollo') estadoEnDesarrollo++;
                 if (status === 'Viable') viables++;
 
-                if (avanceStatus === 'EN DESARROLLO') ideaEnDesarrolloCount++;
+                if (avanceStatus) ideaEnDesarrolloCount++;
 
                 if (premiacionStatus === 'PREMIADA') premiadas++;
                 if (premiacionStatus === 'PENDIENTE') pendientesPremiacion++;
@@ -855,10 +863,10 @@ const promises = [];
                         <strong>${totalIdeas}</strong>
                         <small>Encuestas capturadas</small>
                     </div>
-                    <div class="overview-card" onclick="mostrarInfoCard('Avance general', '${porcentajeEnDesarrollo}%', 'Porcentaje de ideas en estado "en desarrollo".'); mostrarDetalleIdeas('en_desarrollo')">
-                        <span>Avance general (idea en desarrollo)</span>
+                    <div class="overview-card" onclick="mostrarInfoCard('Avance general', '${porcentajeEnDesarrollo}%', 'Porcentaje de ideas con Status propuesta activa.'); mostrarDetalleIdeas('en_desarrollo')">
+                        <span>Avance general (Status propuesta)</span>
                         <strong>${porcentajeEnDesarrollo}%</strong>
-                        <small>${ideaEnDesarrolloCount}/${totalIdeas} en desarrollo</small>
+                        <small>${ideaEnDesarrolloCount}/${totalIdeas} con Status propuesta</small>
                     </div>
                     <div class="overview-card" onclick="mostrarInfoCard('Ideas en estado pendiente', ${pendientes}, 'Ideas que requieren seguimiento o decisión.'); mostrarDetalleIdeas('pendiente')">
                         <span>Ideas en estado pendiente</span>
@@ -868,12 +876,12 @@ const promises = [];
                     <div class="overview-card" onclick="mostrarInfoCard('Ideas premiadas', ${premiadas}, 'Ideas que ya han sido premiadas con resultado final.'); mostrarDetalleIdeas('premiada')">
                         <span>Ideas premiadas</span>
                         <strong>${premiadas}</strong>
-                        <small>Premiación 'Premiada'</small>
+                        <small>Status Feed back 'Premiada'</small>
                     </div>
                     <div class="overview-card" onclick="mostrarInfoCard('Premiación pendiente', ${pendientesPremiacion}, 'Ideas pendientes del proceso de premiación.'); mostrarDetalleIdeas('pendiente_premiacion')">
                         <span>Premiación pendiente</span>
                         <strong>${pendientesPremiacion}</strong>
-                        <small>Premiación 'Pendiente'</small>
+                        <small>Status Feed back 'Pendiente'</small>
                     </div>`;
             }
             const avanceNumero = document.getElementById('avanceGeneralNumero');
@@ -986,7 +994,7 @@ const promises = [];
             statusList.forEach(status => conteoEstado[status] = 0);
 
             encuestas.forEach(e => {
-                const status = normalizarStatus(e.estado || e.estatus);
+                const status = normalizarStatusPropuesta(e.idea_en_desarrollo || e.ideaEnDesarrollo || '');
                 if (status) {
                     if (conteoEstado[status] === undefined) conteoEstado[status] = 0;
                     conteoEstado[status]++;
@@ -1002,12 +1010,12 @@ const promises = [];
                 const count = conteoEstado[label] || 0;
                 const percent = Math.round((count / total) * 100);
                 html += `
-                    <div style="display:grid; grid-template-columns: 220px 1fr 70px; align-items:center; gap:10px;">
+                    <div style="display:grid; grid-template-columns: 220px 1fr auto; align-items:center; gap:10px;">
                         <span style="font-weight:700; color:#1f2937;">${escapeHtml(label)}</span>
                         <div style="width:100%; background:#f3f4f6; border-radius:10px; height:20px; overflow:hidden;">
                             <div style="width:${percent}%; background:#f59e0b; height:100%;"></div>
                         </div>
-                        <span style="font-weight:700; color:#111; text-align:right;">${count} (${percent}%)</span>
+                        <span style="font-weight:700; color:#111; text-align:right; white-space:nowrap;">${count} (${percent}%)</span>
                     </div>`;
             });
             html += '</div>';
@@ -1031,7 +1039,10 @@ const promises = [];
                 html += `<tr><td>${area}</td><td>${conteoArea[area]}</td></tr>`;
             });
             html += '</tbody></table>';
-            document.getElementById('tablaStatus').innerHTML = html;
+            const tablaStatusEl = document.getElementById('tablaStatus');
+            if (tablaStatusEl) {
+                tablaStatusEl.innerHTML = html;
+            }
 
             const chartStatusDiv = document.getElementById('chartStatus');
             if (chartStatusDiv) {
@@ -1041,12 +1052,12 @@ const promises = [];
                     const count = conteoArea[area];
                     const percent = Math.round((count / total) * 100);
                     chartHtml += `
-                        <div style="display:grid; grid-template-columns: 180px 1fr 60px; align-items:center; gap:10px;">
+                        <div style="display:grid; grid-template-columns: 180px 1fr auto; align-items:center; gap:10px;">
                             <span style="white-space: nowrap; font-weight:700;">${area}</span>
                             <div style="width:100%; background:#e2e8f0; border-radius:10px; height:20px; overflow:hidden;">
                                 <div style="width:${percent}%; background:#3b82f6; height:100%;"></div>
                             </div>
-                            <span style="text-align:right;">${count} (${percent}%)</span>
+                            <span style="text-align:right; white-space:nowrap;">${count} (${percent}%)</span>
                         </div>`;
                 });
                 chartHtml += '</div>';
