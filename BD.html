@@ -181,6 +181,9 @@
         <div id="pagination-controls" style="display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-bottom:10px;">
             <button id="prevPage" style="padding:6px 12px; border-radius:8px; border:1px solid #94a3b8; background:#fff; cursor:pointer;">Anterior</button>
             <span id="pageInfo" style="font-weight:700; color:#334155;"></span>
+            <label for="pageJumpInput" style="font-size:0.92em; color:#475569;">Ir a</label>
+            <input id="pageJumpInput" type="number" min="1" step="1" style="width:90px; padding:6px 8px; border:1px solid #94a3b8; border-radius:8px;" />
+            <button id="goToPageBtn" style="padding:6px 12px; border-radius:8px; border:1px solid #2563eb; background:#eff6ff; color:#1d4ed8; cursor:pointer;">Ir</button>
             <button id="nextPage" style="padding:6px 12px; border-radius:8px; border:1px solid #94a3b8; background:#fff; cursor:pointer;">Siguiente</button>
         </div>
         <table>
@@ -199,10 +202,13 @@
                     <th>Correo electronico</th>
                     <th>Tipo de mejora</th>
                     <th>Tipo de idea</th>
-                    <th>Estado</th>
+                    <th>Estado de viabilidad</th>
                     <th>Comentarios Lean</th>
-                    <th>Idea en desarrollo</th>
-                    <th>Premiación</th>
+                    <th>Status propuesta</th>
+                    <th>Status Feed back</th>
+                    <th>Involucrados</th>
+                    <th>Avance</th>
+                    <th>%</th>
                     <th>Responsable tarea</th>
                     <th>Fecha revisión</th>
                     <th>Fecha fin</th>
@@ -210,7 +216,7 @@
                 </tr>
             </thead>
             <tbody id="tbody-encuestas">
-                <tr><td colspan="21">Cargando datos...</td></tr>
+                <tr><td colspan="24">Cargando datos...</td></tr>
             </tbody>
         </table>
     </div>
@@ -245,10 +251,13 @@
         const pageInfo = document.getElementById('pageInfo');
         const prevPageBtn = document.getElementById('prevPage');
         const nextPageBtn = document.getElementById('nextPage');
+        const pageJumpInput = document.getElementById('pageJumpInput');
+        const goToPageBtn = document.getElementById('goToPageBtn');
 
         let currentData = [];
         let currentPage = 1;
         const pageSize = 50;
+        const involucradosOptions = ['Calidad','Mantenimiento','Ingeniería','Jefatura','Costos'];
 
         let filteredData = null; // Si es null, usa currentData completo
 
@@ -271,6 +280,26 @@
                 (filteredData ? ` / ${currentData.length} totales` : '') + `)`;
             prevPageBtn.disabled = currentPage <= 1;
             nextPageBtn.disabled = currentPage >= totalPages;
+            if (pageJumpInput) {
+                pageJumpInput.min = '1';
+                pageJumpInput.max = String(totalPages);
+                if (document.activeElement !== pageJumpInput) {
+                    pageJumpInput.value = String(currentPage);
+                }
+                pageJumpInput.title = `Escribe un número entre 1 y ${totalPages}`;
+            }
+        }
+
+        function goToPage(pageNumber) {
+            const source = getSourceData();
+            const totalPages = Math.max(1, Math.ceil(source.length / pageSize));
+            const target = Math.min(totalPages, Math.max(1, Number(pageNumber) || 1));
+            if (target === currentPage) {
+                updatePagination();
+                return;
+            }
+            currentPage = target;
+            renderPage();
         }
 
         function parseDateValue(valor) {
@@ -312,6 +341,16 @@
             const fecha = new Date(str);
             if (!isNaN(fecha.getTime())) return fecha.toISOString().slice(0, 10);
             return str;
+        }
+
+        function computeAvancePercentage(avanceValue, involucradosValue) {
+            const values = String(avanceValue || '').split(/[,;]+/).map(v => v.trim()).filter(Boolean);
+            const totalValues = String(involucradosValue || '').split(/[,;]+/).map(v => v.trim()).filter(Boolean);
+            const total = totalValues.length || values.length;
+            if (total === 0) return '';
+            const count = values.length;
+            const raw = (count / total) * 100;
+            return `${raw.toFixed(2).replace('.', ',')}%`;
         }
 
         function getIdeaNameFromProposal(propuesta) {
@@ -397,6 +436,9 @@
                     <td>${(row.comentarios_lean || '')}</td>
                     <td>${(row.idea_en_desarrollo || '')}</td>
                     <td>${(row.premiacion || '')}</td>
+                    <td>${(row.involucrados || '')}</td>
+                    <td>${(row.avance || row['%'] || '')}</td>
+                    <td>${row.porcentaje || computeAvancePercentage(row.avance || row['%'], row.involucrados)}</td>
                     <td>${(row.responsable_tarea || '')}</td>
                     <td>${parseDateValue(row.fecha_revision || '')}</td>
                     <td>${parseDateValue(row.fecha_fin || '')}</td>
@@ -423,7 +465,7 @@
             if (!data) {
                 currentData = [];
                 currentPage = 1;
-                tbody.innerHTML = '<tr><td colspan="21">No hay registros en la base de datos.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="24">No hay registros en la base de datos.</td></tr>';
                 updatePagination();
                 return;
             }
@@ -451,6 +493,82 @@
 
             const cells = Array.from(tr.querySelectorAll('td'));
             const areaOptions = ['MAQUILLAJES','EMULSIONES','HIDROALCOHOLES','ALMACÉN','CENDIS','MANTENIMIENTO','CALIDAD','LEAN','TTCA','OTRO'];
+            const renderChipGroup = (cell, options, selectedValues, onChange) => {
+                const selectedUpper = selectedValues.map(v => v.toUpperCase());
+                const container = document.createElement('div');
+                container.style.display = 'flex';
+                container.style.flexWrap = 'wrap';
+                container.style.gap = '8px';
+                options.forEach(opt => {
+                    const label = document.createElement('label');
+                    label.style.display = 'inline-flex';
+                    label.style.alignItems = 'center';
+                    label.style.gap = '6px';
+                    label.style.padding = '6px 10px';
+                    label.style.border = '1px solid #cbd5e1';
+                    label.style.borderRadius = '999px';
+                    label.style.cursor = 'pointer';
+                    label.style.background = selectedUpper.includes(opt.toUpperCase()) ? '#e0e7ff' : '#f8fafc';
+                    label.style.userSelect = 'none';
+
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.value = opt;
+                    checkbox.checked = selectedUpper.includes(opt.toUpperCase());
+                    checkbox.style.cursor = 'pointer';
+                    checkbox.addEventListener('change', () => {
+                        label.style.background = checkbox.checked ? '#c7d2fe' : '#f8fafc';
+                        if (typeof onChange === 'function') onChange();
+                    });
+
+                    const span = document.createElement('span');
+                    span.textContent = opt;
+                    span.style.fontSize = '0.95em';
+                    span.style.color = '#1f2937';
+
+                    label.appendChild(checkbox);
+                    label.appendChild(span);
+                    container.appendChild(label);
+                });
+                cell.innerHTML = '';
+                cell.appendChild(container);
+            };
+
+            const updatePorcentajeFromAvance = () => {
+                const porcentajeCell = cells[19];
+                const avanceCell = cells[18];
+                const selected = Array.from(avanceCell.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value.trim())
+                    .filter(Boolean);
+                const involvedCount = Array.from(cells[17].querySelectorAll('input[type="checkbox"]:checked')).length;
+                const raw = involvedCount === 0 ? 0 : (selected.length / involvedCount) * 100;
+                const percentText = `${raw.toFixed(2).replace('.', ',')}%`;
+                porcentajeCell.textContent = percentText;
+                porcentajeCell.setAttribute('data-full-text', percentText);
+                porcentajeCell.style.background = '#fff7df';
+            };
+            const refreshAvanceFromInvolucrados = () => {
+                const involucradosCell = cells[17];
+                const avanceCell = cells[18];
+                const selectedInvolucrados = Array.from(involucradosCell.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value.trim())
+                    .filter(Boolean);
+                const currentAvance = Array.from(avanceCell.querySelectorAll('input[type="checkbox"]:checked'))
+                    .map(cb => cb.value.trim())
+                    .filter(Boolean);
+                const selectedAvance = currentAvance.filter(value => selectedInvolucrados.includes(value));
+
+                if (selectedInvolucrados.length === 0) {
+                    avanceCell.innerHTML = '<span style="color:#64748b; font-size:0.95em;">Seleccione primero Involucrados</span>';
+                    avanceCell.setAttribute('data-full-text', '');
+                    updatePorcentajeFromAvance();
+                    return;
+                }
+
+                renderChipGroup(avanceCell, selectedInvolucrados, selectedAvance, updatePorcentajeFromAvance);
+                avanceCell.setAttribute('data-full-text', selectedAvance.join(', '));
+                updatePorcentajeFromAvance();
+            };
             for (let i = 2; i < cells.length - 1; i++) {
                 if (i === 6) { // area column
                     if (editable) {
@@ -496,7 +614,7 @@
                 }
 
                 if (i === 13) { // estado column
-                    const estadoOptions = ['CERRADA', 'EN CONSULTA DE VIABILIDAD', 'IMPLEMENTADA', 'NO VIABLE', 'PROYECTO LEAN', 'UNIFICADA', 'VIABLE'];
+                    const estadoOptions = ['VIABLE', 'NO VIABLE'];
                     if (editable) {
                         const current = (cells[i].getAttribute('data-full-text') || cells[i].innerText.trim()).toUpperCase();
                         const select = document.createElement('select');
@@ -633,8 +751,8 @@
                     continue;
                 }
 
-                if (i === 15) { // idea en desarrollo
-                    const ideaDevOptions = ['CON FEED BACK', 'IDEA EN DESARROLLO', 'IMPLEMENTADA', 'PENDIENTE FEED BACK'];
+                if (i === 15) { // Status propuesta
+                    const ideaDevOptions = ['CERRADA', 'PREMIADA', 'IDEA EN DESARROLLO', 'PENDIENTE POR PREMIAR', 'EN CONSULTA DE VIABILIDAD'];
                     if (editable) {
                         const current = (cells[i].getAttribute('data-full-text') || cells[i].innerText.trim()).toUpperCase();
                         const select = document.createElement('select');
@@ -682,8 +800,8 @@
                     continue;
                 }
 
-                if (i === 16) { // premiación
-                    const premiacionOptions = ['CERRADA', 'IDEA EN DESARROLLO', 'IMPLEMENTADA', 'PENDIENTE FEED BACK', 'PENDIENTE PREMIACION', 'PREMIADA', 'PROPUESTA DUPLICADA'];
+                if (i === 16) { // Status Feed back
+                    const premiacionOptions = ['CON FEED BACK', 'PENDIENTE FEED BACK'];
                     if (editable) {
                         const current = (cells[i].getAttribute('data-full-text') || cells[i].innerText.trim()).toUpperCase();
                         const select = document.createElement('select');
@@ -731,7 +849,58 @@
                     continue;
                 }
 
-                if (i === 18 || i === 19) { // fecha revisión / fecha fin
+                if (i === 17) { // Involucrados
+                    if (editable) {
+                        const currentValues = (cells[i].getAttribute('data-full-text') || cells[i].innerText.trim())
+                            .split(/[,;]+/)
+                            .map(v => v.trim())
+                            .filter(Boolean);
+                        renderChipGroup(cells[i], involucradosOptions, currentValues, refreshAvanceFromInvolucrados);
+                        cells[i].style.background = '#fff7df';
+                    } else {
+                        const full = (cells[i].innerText || '').trim() || cells[i].getAttribute('data-full-text') || '';
+                        cells[i].textContent = full;
+                        cells[i].setAttribute('data-full-text', full);
+                        cells[i].style.background = '#f8fafc';
+                    }
+                    continue;
+                }
+
+                if (i === 19) { // %
+                    if (editable) {
+                        updatePorcentajeFromAvance();
+                    } else {
+                        const full = (cells[i].innerText || '').trim() || cells[i].getAttribute('data-full-text') || '';
+                        cells[i].textContent = full;
+                        cells[i].setAttribute('data-full-text', full);
+                    }
+                    cells[i].style.background = editable ? '#fff7df' : '#f8fafc';
+                    continue;
+                }
+
+                if (i === 18) { // Avance
+                    if (editable) {
+                        const savedAvance = (cells[i].getAttribute('data-full-text') || cells[i].innerText.trim())
+                            .split(/[,;]+/)
+                            .map(v => v.trim())
+                            .filter(Boolean);
+                        const selectedInvolucrados = Array.from(cells[17].querySelectorAll('input[type="checkbox"]:checked'))
+                            .map(cb => cb.value.trim())
+                            .filter(Boolean);
+                        const initialAvance = savedAvance.filter(value => selectedInvolucrados.includes(value));
+                        renderChipGroup(cells[i], selectedInvolucrados, initialAvance, updatePorcentajeFromAvance);
+                        cells[i].setAttribute('data-full-text', initialAvance.join(', '));
+                        updatePorcentajeFromAvance();
+                    } else {
+                        const full = (cells[i].innerText || '').trim() || cells[i].getAttribute('data-full-text') || '';
+                        cells[i].textContent = full;
+                        cells[i].setAttribute('data-full-text', full);
+                    }
+                    cells[i].style.background = editable ? '#fff7df' : '#f8fafc';
+                    continue;
+                }
+
+                if (i === 21 || i === 22) { // fecha revisión / fecha fin
                     if (editable) {
                         const current = cells[i].getAttribute('data-full-text') || cells[i].innerText.trim();
                         const input = document.createElement('input');
@@ -814,11 +983,24 @@
             const premiacionSelect = premiacionCell.querySelector('select');
             const premiacionValue = premiacionSelect ? premiacionSelect.value.trim() : premiacionCell.innerText.trim();
 
-            const fechaRevisionCell = cells[18];
+            const involucradosCell = cells[17];
+            const involucradosChecked = Array.from(involucradosCell.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value.trim()).filter(Boolean);
+            const involucradosValue = involucradosChecked.join(', ');
+
+            const avanceCell = cells[18];
+            const avanceChecked = Array.from(avanceCell.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value.trim()).filter(Boolean);
+            const avanceValue = avanceChecked.join(', ');
+            const percentageValueRaw = involucradosChecked.length === 0 ? 0 : (avanceChecked.length / involucradosChecked.length) * 100;
+            const porcentajeValue = `${percentageValueRaw.toFixed(2).replace('.', ',')}%`;
+
+            const responsableCell = cells[20];
+            const responsableValue = responsableCell.innerText.trim();
+
+            const fechaRevisionCell = cells[21];
             const fechaRevisionInput = fechaRevisionCell.querySelector('input[type="date"]');
             const fechaRevisionValue = parseDateValue(fechaRevisionInput ? fechaRevisionInput.value.trim() : fechaRevisionCell.innerText.trim());
 
-            const fechaFinCell = cells[19];
+            const fechaFinCell = cells[22];
             const fechaFinInput = fechaFinCell.querySelector('input[type="date"]');
             const fechaFinValue = parseDateValue(fechaFinInput ? fechaFinInput.value.trim() : fechaFinCell.innerText.trim());
 
@@ -834,11 +1016,14 @@
                 estado: estadoValue,
                 idea_en_desarrollo: ideaDevValue,
                 premiacion: premiacionValue,
+                involucrados: involucradosValue,
+                avance: avanceValue,
+                porcentaje: porcentajeValue,
                 correo: cells[10].innerText.trim(),
                 tipo_mejora: cells[11].innerText.split(',').map(v => v.trim()).filter(Boolean),
                 tipo_idea: cells[12].innerText.split(',').map(v => v.trim()).filter(Boolean),
                 comentarios_lean: cells[14].innerText.trim(),
-                responsable_tarea: cells[17].innerText.trim(),
+                responsable_tarea: responsableValue,
                 fecha_revision: fechaRevisionValue,
                 fecha_fin: fechaFinValue,
             };
@@ -907,7 +1092,7 @@
         }
 
         function showError(message) {
-            tbody.innerHTML = `<tr><td colspan="21" style="color:red; font-weight:bold;">Error al cargar datos: ${message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="24" style="color:red; font-weight:bold;">Error al cargar datos: ${message}</td></tr>`;
         }
 
         db.ref('encuestas').orderByKey().on('value', renderEncuestasList, (error) => {
@@ -917,17 +1102,31 @@
 
         prevPageBtn.addEventListener('click', () => {
             if (currentPage > 1) {
-                currentPage -= 1;
-                renderPage();
+                goToPage(currentPage - 1);
             }
         });
         nextPageBtn.addEventListener('click', () => {
-            const totalPages = Math.max(1, Math.ceil(currentData.length / pageSize));
+            const totalPages = Math.max(1, Math.ceil(getSourceData().length / pageSize));
             if (currentPage < totalPages) {
-                currentPage += 1;
-                renderPage();
+                goToPage(currentPage + 1);
             }
         });
+
+        if (goToPageBtn) {
+            goToPageBtn.addEventListener('click', () => {
+                if (!pageJumpInput) return;
+                goToPage(pageJumpInput.value);
+            });
+        }
+
+        if (pageJumpInput) {
+            pageJumpInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    goToPage(pageJumpInput.value);
+                }
+            });
+        }
 
         const filterInput = document.getElementById('filterInput');
 
@@ -964,7 +1163,7 @@
                 Array.isArray(row.tipo_mejora) ? row.tipo_mejora.join(' ') : row.tipo_mejora,
                 Array.isArray(row.tipo_idea) ? row.tipo_idea.join(' ') : row.tipo_idea,
                 row.estado, row.comentarios_lean, row.idea_en_desarrollo,
-                row.premiacion, row.responsable_tarea, row.fecha_revision, row.fecha_fin
+                row.premiacion, row.involucrados, row.avance || row['%'] || '', row.porcentaje || computeAvancePercentage(row.avance || row['%'], row.involucrados), row.responsable_tarea, row.fecha_revision, row.fecha_fin
             ].filter(Boolean).map(x => String(x).toLowerCase()).join(' ');
             return haystack.includes(filterValue);
         }
@@ -1011,7 +1210,7 @@
                 if (filterValue) {
                     filterInput.placeholder = `Filtrar filas... (${totalMatches}/${totales} encontrados)`;
                 } else {
-                    filterInput.placeholder = `Filtrar filas por todo el archivo (Nombre, Área, Estado...) (${totales} totales)`;
+                    filterInput.placeholder = `Filtrar filas por todo el archivo (Nombre, Área, Estado de viabilidad...) (${totales} totales)`;
                 }
             }
 
@@ -1027,7 +1226,7 @@
             const wb = XLSX.utils.book_new();
 
             // Definir encabezados exactos
-            const headers = ['Idea N°','Fecha de registro','Nombre de la idea','Nombres y apellidos','Numero de documento','Celular','Area','Situación actual','Propuesta','Justificacion','Correo electronico','Tipo de mejora','Tipo de idea','Estado','Comentarios Lean','Idea en desarrollo','Premiación','Responsable tarea','Fecha revisión','Fecha fin'];
+            const headers = ['Idea N°','Fecha de registro','Nombre de la idea','Nombres y apellidos','Numero de documento','Celular','Area','Situación actual','Propuesta','Justificacion','Correo electronico','Tipo de mejora','Tipo de idea','Estado de viabilidad','Comentarios Lean','Status propuesta','Status Feed back','Involucrados','Avance','%','Responsable tarea','Fecha revisión','Fecha fin'];
 
             const csvData = currentData.map(row => {
                 return [
@@ -1058,6 +1257,9 @@
                     row.comentarios_lean || '',
                     row.idea_en_desarrollo || '',
                     row.premiacion || '',
+                    row.involucrados || '',
+                    row.avance || row.involucrados || row['%'] || '',
+                    row.porcentaje || computeAvancePercentage(row.avance || row['%'], row.involucrados),
                     row.responsable_tarea || '',
                     row.fecha_revision || '',
                     row.fecha_fin || ''
@@ -1079,7 +1281,7 @@
             }
 
             // Estilo de datos y anchos
-            const colWidths = [9, 14, 25, 22, 18, 14, 13, 30, 32, 28, 24, 18, 18, 12, 24, 18, 14, 20, 14, 12];
+            const colWidths = [9, 14, 25, 22, 18, 14, 13, 30, 32, 28, 24, 18, 18, 12, 24, 18, 14, 20, 14, 10, 12, 12, 12];
             ws['!cols'] = colWidths.map(w => ({wpx: w * 7}));
 
             for (let R = 1; R <= range.e.r; ++R) {
