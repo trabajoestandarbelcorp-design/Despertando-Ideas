@@ -91,6 +91,9 @@
             overflow: visible;
             text-overflow: clip;
         }
+        .column-focus {
+            box-shadow: inset 0 0 0 2px #f59e0b;
+        }
         tbody td {
             border: 1.5px solid #e0e7ff;
             padding: 10px 8px;
@@ -171,6 +174,7 @@
         <a href="index.html" class="back-to-form"><i class="fa fa-arrow-left" style="margin-right:6px"></i>Volver</a>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
             <span id="db-welcome" style="color:#3749ff; font-weight:700;"><i class="fa fa-database" style="margin-right:6px"></i>Acceso a Base de Datos activo</span>
+            <select id="filterColumn" style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; background:#fff; min-width:220px; outline:none;"></select>
             <input id="filterInput" type="text" placeholder="" style="padding:10px 12px; border:1px solid #cbd5e1; border-radius:8px; width:320px; outline:none;" />
             <span id="filterStatus" style="font-weight:600; color:#1f2937; display:none;"></span>
             <button id="exportXlsxBtn" style="background:#10b981; color:#fff; border:none; border-radius:10px; padding:10px 14px; cursor:pointer; font-weight:700; box-shadow:0 4px 12px rgba(16, 185, 129, 0.35);"><i class="fa fa-file-excel" style="margin-right:7px"></i>Exportar</button>
@@ -257,7 +261,7 @@
         let currentData = [];
         let currentPage = 1;
         const pageSize = 50;
-        const involucradosOptions = ['Calidad','Mantenimiento','Ingeniería','Jefatura','Costos'];
+        const involucradosOptions = ['Calidad','Mantenimiento','Ingeniería','Jefatura','Costos','SST','Lean','Planeación','Compras'];
 
         let filteredData = null; // Si es null, usa currentData completo
 
@@ -1129,22 +1133,72 @@
         }
 
         const filterInput = document.getElementById('filterInput');
+        const filterColumn = document.getElementById('filterColumn');
+
+        function normalizeFilterText(value) {
+            return String(value || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        }
+
+        const filterColumns = [
+            { key: 'all', label: 'Todas las columnas', index: null, getValue: () => '' },
+            { key: 'consecutivo', label: 'Idea N°', index: 0, getValue: (row) => row.consecutivo || row.key || '' },
+            { key: 'fecha_registro', label: 'Fecha de registro', index: 1, getValue: (row) => row.fecha_registro || row.fecha || '' },
+            { key: 'nombre_idea', label: 'Nombre de la idea', index: 2, getValue: (row) => row.nombre_idea || '' },
+            { key: 'nombre', label: 'Nombres y apellidos', index: 3, getValue: (row) => row.nombre || '' },
+            { key: 'documento', label: 'Numero de documento', index: 4, getValue: (row) => row.documento || '' },
+            { key: 'telefono', label: 'Celular', index: 5, getValue: (row) => row.telefono || '' },
+            { key: 'area', label: 'Area', index: 6, getValue: (row) => row.area || '' },
+            { key: 'situacion', label: 'Situación actual', index: 7, getValue: (row) => row.situacion || '' },
+            { key: 'propuesta', label: 'Propuesta', index: 8, getValue: (row) => row.propuesta || '' },
+            { key: 'justificacion', label: 'Justificacion', index: 9, getValue: (row) => row.justificacion || '' },
+            { key: 'correo', label: 'Correo electronico', index: 10, getValue: (row) => row.correo || '' },
+            { key: 'tipo_mejora', label: 'Tipo de mejora', index: 11, getValue: (row) => Array.isArray(row.tipo_mejora) ? row.tipo_mejora.join(' ') : (row.tipo_mejora || '') },
+            { key: 'tipo_idea', label: 'Tipo de idea', index: 12, getValue: (row) => Array.isArray(row.tipo_idea) ? row.tipo_idea.join(' ') : (row.tipo_idea || '') },
+            { key: 'estado', label: 'Estado de viabilidad', index: 13, getValue: (row) => row.estado || '' },
+            { key: 'comentarios_lean', label: 'Comentarios Lean', index: 14, getValue: (row) => row.comentarios_lean || '' },
+            { key: 'idea_en_desarrollo', label: 'Status propuesta', index: 15, getValue: (row) => row.idea_en_desarrollo || '' },
+            { key: 'premiacion', label: 'Status Feed back', index: 16, getValue: (row) => row.premiacion || '' },
+            { key: 'involucrados', label: 'Involucrados', index: 17, getValue: (row) => row.involucrados || '' },
+            { key: 'avance', label: 'Avance', index: 18, getValue: (row) => row.avance || row['%'] || '' },
+            { key: 'porcentaje', label: '%', index: 19, getValue: (row) => row.porcentaje || computeAvancePercentage(row.avance || row['%'], row.involucrados) },
+            { key: 'responsable_tarea', label: 'Responsable tarea', index: 20, getValue: (row) => row.responsable_tarea || '' },
+            { key: 'fecha_revision', label: 'Fecha revisión', index: 21, getValue: (row) => row.fecha_revision || '' },
+            { key: 'fecha_fin', label: 'Fecha fin', index: 22, getValue: (row) => row.fecha_fin || '' }
+        ];
+        const filterColumnsByKey = Object.fromEntries(filterColumns.map((column) => [column.key, column]));
+
+        if (filterColumn) {
+            filterColumns.forEach((column) => {
+                const option = document.createElement('option');
+                option.value = column.key;
+                option.textContent = column.label;
+                filterColumn.appendChild(option);
+            });
+            filterColumn.value = 'all';
+        }
 
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
         }
 
-        function highlightTable(filterValue) {
+        function highlightTable(filterValue, columnKey = 'all') {
             const regex = filterValue ? new RegExp('(' + escapeRegExp(filterValue) + ')', 'gi') : null;
+            const selectedColumn = filterColumnsByKey[columnKey] || filterColumnsByKey.all;
+            const highlightIndex = typeof selectedColumn.index === 'number' ? selectedColumn.index : null;
             tbody.querySelectorAll('tr').forEach((tr) => {
-                tr.querySelectorAll('td').forEach((cell) => {
+                tr.querySelectorAll('td').forEach((cell, cellIndex) => {
                     // No tocar la celda de acciones para conservar botones y eventos
                     if (cell.querySelector('button')) return;
 
                     const original = cell.dataset.rawText !== undefined ? cell.dataset.rawText : cell.textContent;
                     cell.dataset.rawText = original;
 
-                    if (!regex) {
+                    const shouldHighlight = highlightIndex === null || cellIndex === highlightIndex;
+                    if (!regex || !shouldHighlight) {
                         cell.textContent = original;
                     } else {
                         cell.innerHTML = original.replace(regex, '<mark style="background:#fff176;color:#000;padding:0 2px;border-radius:2px;">$1</mark>');
@@ -1155,21 +1209,28 @@
 
         const filterStatus = document.getElementById('filterStatus');
 
-        function rowMatches(row, filterValue) {
+        function rowMatches(row, filterValue, columnKey = 'all') {
             if (!filterValue) return true;
-            const haystack = [
-                row.consecutivo, row.nombre_idea, row.nombre, row.documento, row.telefono,
-                row.fecha, row.fecha_registro, row.area, row.situacion, row.propuesta, row.justificacion, row.correo,
-                Array.isArray(row.tipo_mejora) ? row.tipo_mejora.join(' ') : row.tipo_mejora,
-                Array.isArray(row.tipo_idea) ? row.tipo_idea.join(' ') : row.tipo_idea,
-                row.estado, row.comentarios_lean, row.idea_en_desarrollo,
-                row.premiacion, row.involucrados, row.avance || row['%'] || '', row.porcentaje || computeAvancePercentage(row.avance || row['%'], row.involucrados), row.responsable_tarea, row.fecha_revision, row.fecha_fin
-            ].filter(Boolean).map(x => String(x).toLowerCase()).join(' ');
-            return haystack.includes(filterValue);
+            const selectedColumn = filterColumnsByKey[columnKey] || filterColumnsByKey.all;
+            const normalizedFilter = normalizeFilterText(filterValue);
+
+            let haystack = '';
+            if (selectedColumn.key === 'all') {
+                haystack = filterColumns
+                    .filter((column) => column.key !== 'all')
+                    .map((column) => column.getValue(row))
+                    .filter(Boolean)
+                    .join(' ');
+            } else {
+                haystack = selectedColumn.getValue(row);
+            }
+
+            return normalizeFilterText(haystack).includes(normalizedFilter);
         }
 
         function applyFilter() {
-            const filterValue = filterInput ? filterInput.value.toLowerCase().trim() : '';
+            const filterValue = filterInput ? filterInput.value.trim() : '';
+            const selectedColumnKey = filterColumn ? filterColumn.value : 'all';
 
             // reset temporal de edición siempre que se inicia un filtro
             tbody.querySelectorAll('tr').forEach(tr => {
@@ -1188,8 +1249,8 @@
                 return;
             }
 
-            filteredData = currentData.filter(row => rowMatches(row, filterValue));
-            const firstMatchIndex = filteredData.findIndex(row => rowMatches(row, filterValue));
+            filteredData = currentData.filter(row => rowMatches(row, filterValue, selectedColumnKey));
+            const firstMatchIndex = filteredData.findIndex(row => rowMatches(row, filterValue, selectedColumnKey));
             if (firstMatchIndex >= 0) {
                 currentPage = Math.floor(firstMatchIndex / pageSize) + 1;
             } else {
@@ -1207,18 +1268,60 @@
 
             if (filterInput) {
                 const totales = currentData.length;
+                const selectedColumn = filterColumnsByKey[selectedColumnKey] || filterColumnsByKey.all;
                 if (filterValue) {
-                    filterInput.placeholder = `Filtrar filas... (${totalMatches}/${totales} encontrados)`;
+                    filterInput.placeholder = `Filtrar en ${selectedColumn.label}... (${totalMatches}/${totales} encontrados)`;
                 } else {
-                    filterInput.placeholder = `Filtrar filas por todo el archivo (Nombre, Área, Estado de viabilidad...) (${totales} totales)`;
+                    filterInput.placeholder = selectedColumnKey === 'all'
+                        ? `Filtrar filas por todo el archivo (${totales} totales)`
+                        : `Filtrar solo por ${selectedColumn.label} (${totales} totales)`;
                 }
             }
 
-            highlightTable(filterValue);
+            highlightTable(filterValue, selectedColumnKey);
+        }
+
+        let columnFocusTimeout = null;
+
+        function clearColumnFocus() {
+            document.querySelectorAll('.column-focus').forEach((el) => el.classList.remove('column-focus'));
+        }
+
+        function focusAndScrollToColumn(columnKey) {
+            const selectedColumn = filterColumnsByKey[columnKey] || filterColumnsByKey.all;
+            if (!selectedColumn || typeof selectedColumn.index !== 'number') return;
+
+            const table = document.querySelector('.tabla-container table');
+            const container = document.querySelector('.tabla-container');
+            if (!table || !container) return;
+
+            const nth = selectedColumn.index + 1;
+            const headerCell = table.querySelector(`thead th:nth-child(${nth})`);
+            if (!headerCell) return;
+
+            const containerRect = container.getBoundingClientRect();
+            const headerRect = headerCell.getBoundingClientRect();
+            const targetScrollLeft = container.scrollLeft + (headerRect.left - containerRect.left) - Math.max(16, (container.clientWidth - headerRect.width) / 2);
+            container.scrollTo({ left: Math.max(0, targetScrollLeft), behavior: 'smooth' });
+
+            clearColumnFocus();
+            table.querySelectorAll(`thead th:nth-child(${nth}), tbody td:nth-child(${nth})`).forEach((cell) => {
+                cell.classList.add('column-focus');
+            });
+
+            clearTimeout(columnFocusTimeout);
+            columnFocusTimeout = setTimeout(clearColumnFocus, 1400);
         }
 
         if (filterInput) {
             filterInput.addEventListener('input', applyFilter);
+        }
+
+        if (filterColumn) {
+            filterColumn.addEventListener('change', () => {
+                applyFilter();
+                focusAndScrollToColumn(filterColumn.value);
+            });
         }
 
         function exportTableToXLSX(filename = 'base_de_datos.xlsx') {
