@@ -279,6 +279,20 @@
         tr:nth-child(even) td {
             background: #eff6ff;
         }
+        .count-link {
+            border: none;
+            background: transparent;
+            color: inherit;
+            font-weight: 700;
+            font-size: 1em;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            padding: 0;
+        }
+        .count-link:hover {
+            color: #1d4ed8;
+        }
         .chart-container {
             width: 100%;
             max-width: 650px;
@@ -643,51 +657,90 @@ const promises = [];
             })).sort((a,b)=>a.consecutivo.localeCompare(b.consecutivo));
         }
 
-        function mostrarDetalleIdeas(categoria) {
-            const datos = obtenerIdeasPorCategoria(categoria);
+        function ensureDetalleIdeasModal() {
             const modalId = 'detalle-ideas-modal';
             let modal = document.getElementById(modalId);
-            if (!modal) {
-                modal = document.createElement('div');
-                modal.id = modalId;
-                modal.style.position = 'fixed';
-                modal.style.top = '0';
-                modal.style.left = '0';
-                modal.style.right = '0';
-                modal.style.bottom = '0';
-                modal.style.background = 'rgba(15, 23, 42, 0.65)';
-                modal.style.zIndex = '10001';
-                modal.style.display = 'flex';
-                modal.style.alignItems = 'center';
-                modal.style.justifyContent = 'center';
-                modal.innerHTML = `
-                    <div id="detalle-ideas-card" style="width:90%; max-width:640px; max-height:78vh; overflow:auto; background:#fff; border-radius:14px; padding:18px; box-shadow:0 12px 30px rgba(15,23,42,0.28); position:relative;">
-                        <button id="detalle-ideas-close" style="position:absolute; top:12px; right:14px; background:#ef4444; border:none; color:#fff; border-radius:8px; cursor:pointer; padding:6px 10px; font-weight:700;">Cerrar</button>
-                        <h3 id="detalle-ideas-title" style="margin-top:0; color:#1e3a8a;"></h3>
-                        <p id="detalle-ideas-subtitle" style="color:#475569; margin:4px 0 12px 0;"></p>
-                        <ul id="detalle-ideas-list" style="padding-left:18px; margin:0; max-height:60vh; overflow:auto;">
-                        </ul>
-                    </div>
-                `;
-                document.body.appendChild(modal);
-                modal.querySelector('#detalle-ideas-close').onclick = () => { modal.style.display = 'none'; };
-                modal.onclick = (event) => {
-                    if (event.target === modal) modal.style.display = 'none';
-                };
-            }
+            if (modal) return modal;
+
+            modal = document.createElement('div');
+            modal.id = modalId;
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.right = '0';
+            modal.style.bottom = '0';
+            modal.style.background = 'rgba(15, 23, 42, 0.65)';
+            modal.style.zIndex = '10001';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.innerHTML = `
+                <div id="detalle-ideas-card" style="width:90%; max-width:640px; max-height:78vh; overflow:auto; background:#fff; border-radius:14px; padding:18px; box-shadow:0 12px 30px rgba(15,23,42,0.28); position:relative;">
+                    <button id="detalle-ideas-close" style="position:absolute; top:12px; right:14px; background:#ef4444; border:none; color:#fff; border-radius:8px; cursor:pointer; padding:6px 10px; font-weight:700;">Cerrar</button>
+                    <h3 id="detalle-ideas-title" style="margin-top:0; color:#1e3a8a;"></h3>
+                    <p id="detalle-ideas-subtitle" style="color:#475569; margin:4px 0 12px 0;"></p>
+                    <ul id="detalle-ideas-list" style="padding-left:18px; margin:0; max-height:60vh; overflow:auto;">
+                    </ul>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.querySelector('#detalle-ideas-close').onclick = () => { modal.style.display = 'none'; };
+            modal.onclick = (event) => {
+                if (event.target === modal) modal.style.display = 'none';
+            };
+            return modal;
+        }
+
+        function openDetalleIdeasModal(titulo, datos, emptyMessage) {
+            const modal = ensureDetalleIdeasModal();
             const title = modal.querySelector('#detalle-ideas-title');
             const subtitle = modal.querySelector('#detalle-ideas-subtitle');
             const list = modal.querySelector('#detalle-ideas-list');
+
+            title.textContent = titulo;
+            subtitle.textContent = `${datos.length} idea(s) encontradas`;
+            list.innerHTML = datos.length
+                ? datos.map(i => `<li><strong>${escapeHtml(i.consecutivo)}</strong> - ${escapeHtml(i.nombre)}</li>`).join('')
+                : `<li>${escapeHtml(emptyMessage)}</li>`;
+            modal.style.display = 'flex';
+        }
+
+        function mostrarDetalleIdeas(categoria) {
+            const datos = obtenerIdeasPorCategoria(categoria);
             let label = '';
             if (categoria === 'total') label = 'Todas las ideas';
             if (categoria === 'en_desarrollo') label = 'Ideas con Status propuesta';
             if (categoria === 'pendiente') label = 'Ideas pendientes';
             if (categoria === 'premiada') label = 'Ideas premiadas';
             if (categoria === 'pendiente_premiacion') label = 'Ideas con Status Feed back pendiente';
-            title.textContent = label;
-            subtitle.textContent = `${datos.length} idea(s) encontradas`;            
-            list.innerHTML = datos.length ? datos.map(i => `<li><strong>${escapeHtml(i.consecutivo)}</strong> - ${escapeHtml(i.nombre)}</li>`).join('') : '<li>No hay ideas para esta categoría.</li>';
-            modal.style.display = 'flex';
+            openDetalleIdeasModal(label, datos, 'No hay ideas para esta categoría.');
+        }
+
+        function obtenerIdeasPorProcesoTipo(proceso, tipo) {
+            const encuestas = window.encuestasCache || [];
+            return encuestas
+                .filter((e) => {
+                    const procesoEncuesta = String(e.area || e.Area || '').trim();
+                    const tipos = (Array.isArray(e.tipoIdeaLista) && e.tipoIdeaLista.length)
+                        ? e.tipoIdeaLista
+                        : obtenerTiposIdea(e.tipo_idea || e.tipoIdea || e.TipoIdea || e.tipo_mejora, e.tipo_mejora);
+                    const okProceso = proceso === '__ALL__' || procesoEncuesta === proceso;
+                    const okTipo = tipo === '__ALL__' || tipos.includes(tipo);
+                    return okProceso && okTipo;
+                })
+                .map(e => ({
+                    consecutivo: e.consecutivo || e.key || 'N/A',
+                    nombre: e.nombre_idea || e.nombre || 'sin nombre'
+                }))
+                .sort((a, b) => String(a.consecutivo).localeCompare(String(b.consecutivo), undefined, { numeric: true }));
+        }
+
+        function mostrarDetalleIdeasTabla(proceso, tipo) {
+            const ideas = obtenerIdeasPorProcesoTipo(proceso, tipo);
+            const procLabel = proceso === '__ALL__' ? 'Todos los procesos' : proceso;
+            const tipoLabel = tipo === '__ALL__' ? 'Todos los tipos' : tipo;
+            const titulo = `Ideas de ${procLabel} / ${tipoLabel}`;
+            openDetalleIdeasModal(titulo, ideas, 'No hay ideas para ese filtro en la tabla.');
         }
 
         function normalizarBase(valor) {
@@ -970,13 +1023,30 @@ const promises = [];
                 html += `<tr><td>${escapeHtml(proc)}</td>` + tiposIdea.map(tipo => {
                     const valor = conteo[proc][tipo] || 0;
                     const clases = valor > 0 ? ' style="background: #c7d2fe; font-weight:700;"' : '';
-                    return `<td${clases}>${valor}</td>`;
-                }).join('') + `<td style="font-weight:700;">${procTotal}</td></tr>`;
+                    if (valor > 0) {
+                        return `<td${clases}><button type="button" class="count-link" data-proceso="${escapeHtml(proc)}" data-tipo="${escapeHtml(tipo)}">${valor}</button></td>`;
+                    }
+                    return `<td${clases}>0</td>`;
+                }).join('') + `<td style="font-weight:700;">${procTotal > 0 ? `<button type="button" class="count-link" data-proceso="${escapeHtml(proc)}" data-tipo="__ALL__">${procTotal}</button>` : '0'}</td></tr>`;
             });
             html += '</tbody><tfoot><tr style="background:#e0e7ff; font-weight:700; color:#1e3a8a; border-top:2px solid #6366f1;">';
-            html += '<td>Total</td>' + tiposIdea.map(tipo => `<td>${totalesPorTipo[tipo]}</td>`).join('') + `<td>${totalGeneral}</td>`;
+            html += '<td>Total</td>' + tiposIdea.map(tipo => {
+                const valorTipo = totalesPorTipo[tipo] || 0;
+                return `<td>${valorTipo > 0 ? `<button type="button" class="count-link" data-proceso="__ALL__" data-tipo="${escapeHtml(tipo)}">${valorTipo}</button>` : '0'}</td>`;
+            }).join('') + `<td>${totalGeneral > 0 ? `<button type="button" class="count-link" data-proceso="__ALL__" data-tipo="__ALL__">${totalGeneral}</button>` : '0'}</td>`;
             html += '</tr></tfoot></table>';
-            document.getElementById('tablaIdeas').innerHTML = html;
+            const tablaIdeasEl = document.getElementById('tablaIdeas');
+            tablaIdeasEl.innerHTML = html;
+            if (!tablaIdeasEl._detalleIdeasBindingDone) {
+                tablaIdeasEl.addEventListener('click', (event) => {
+                    const trigger = event.target.closest('.count-link');
+                    if (!trigger) return;
+                    const proceso = trigger.dataset.proceso || '__ALL__';
+                    const tipo = trigger.dataset.tipo || '__ALL__';
+                    mostrarDetalleIdeasTabla(proceso, tipo);
+                });
+                tablaIdeasEl._detalleIdeasBindingDone = true;
+            }
             // Gráfico eliminado; la tabla mantiene el orden por volumen.
         }
 
