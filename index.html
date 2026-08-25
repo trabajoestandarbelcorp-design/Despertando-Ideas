@@ -1,425 +1,3 @@
-Ayudame con este enlace , analizalo "Index - Mentes Brillantes "me sale mi interfaz , pero quiero que antes de verse esta interfaz m e reproduzca el video que quedo cargado en github en el mismo repositorio, es eso posible?
-
-Sí, es totalmente posible. Revisé tu página publicada y efectivamente GitHub Pages está sirviendo tu interfaz “Despertando Ideas” correctamente.
-
-Lo que quieres se puede implementar como una pantalla de introducción (splash) con video:
-
-Usuario abre el enlace → aparece el video → termina el video → desaparece → aparece tu interfaz actual.
-
-No necesitas crear otra página ni cambiar el enlace. Puede hacerse directamente dentro de tu index.html.
-La estructura sería así
-
-Suponiendo que el video que subiste al repositorio se llama:
-
-video-intro.mp4
-
-podríamos poner al principio del <body> algo como:
-
-<!-- INTRO VIDEO -->
-<div id="videoIntro">
-    <video id="introVideo" autoplay muted playsinline>
-        <source src="./video-intro.mp4" type="video/mp4">
-    </video>
-
-    <button id="skipIntro">Saltar intro</button>
-</div>
-
-<!-- TU INTERFAZ ACTUAL -->
-<div id="mainApp">
-    <!-- Aquí continúa todo tu contenido actual -->
-</div>
-
-Y con CSS hacemos que inicialmente el video ocupe toda la pantalla:
-
-#videoIntro {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    background: #000;
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#introVideo {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-#skipIntro {
-    position: absolute;
-    right: 30px;
-    bottom: 30px;
-    padding: 12px 22px;
-    border: none;
-    border-radius: 25px;
-    cursor: pointer;
-    z-index: 100000;
-}
-
-Luego JavaScript detecta cuando termina:
-
-const videoIntro = document.getElementById("videoIntro");
-const introVideo = document.getElementById("introVideo");
-const skipIntro = document.getElementById("skipIntro");
-
-function cerrarIntro() {
-    videoIntro.style.display = "none";
-}
-
-introVideo.addEventListener("ended", cerrarIntro);
-
-skipIntro.addEventListener("click", cerrarIntro);
-
-Hay un detalle importante con el sonido
-
-Los navegadores modernos normalmente bloquean el autoplay de videos con sonido. Por eso en el ejemplo puse:
-
-autoplay muted playsinline
-
-Eso hace que el video pueda arrancar automáticamente tanto en PC como, en muchos casos, en celular.
-
-Pero si tu video tiene narración/música y quieres obligatoriamente que se escuche, te recomiendo una solución más elegante:
-
-    Pantalla inicial con tu logo → botón “Comenzar” ▶ → usuario hace clic → video con sonido → termina → aparece Despertando Ideas.
-
-Ese clic del usuario permite reproducir el video con audio sin pelear con las restricciones de autoplay del navegador.
-
-Además podemos hacer que al finalizar haya un fade suave hacia tu interfaz, en lugar de desaparecer bruscamente.
-Puedo ayudarte directamente sobre tu repositorio
-
-Para dejarlo bien integrado necesito ver la estructura del repositorio y, especialmente, saber cómo se llama exactamente el archivo .mp4 que ya subiste.
-
-Por ejemplo, si tienes:
-
-Despertando-Ideas/
-│
-├── index.html
-├── styles.css
-├── script.js
-├── images/
-│
-└── intro-mentes-brillantes.mp4
-
-entonces puedo indicarte exactamente qué modificar en tu index.html, CSS y JavaScript actuales, sin alterar el formulario, menú, base de datos ni las demás funciones que ya tienes.
-
-Si quieres, pásame el enlace del repositorio de GitHub (no solo el GitHub Pages) o una captura donde se vean los archivos del repositorio, y te digo exactamente dónde insertar cada parte.
-
-Pasted text.txt
-Documento
-asi esta mi index, que cambio realizo aqui?
-
-Sí. Ya revisé tu index.html. En tu caso no necesitas reorganizar las casi 1,900 líneas ni envolver toda la interfaz en otro <div>. Podemos poner el video como una capa de pantalla completa (fixed) por encima de todo lo que ya tienes y, cuando termine, retirarla. Tu <body> comienza en la línea 1033 y allí inmediatamente cargas el fondo y luego tu interfaz.
-
-Te propongo hacerlo con 3 cambios pequeños.
-1. Agrega este CSS antes de </style>
-
-En tu archivo, el </style> principal está justo antes de los scripts de Firebase.
-
-Justo antes de ese </style>, pega:
-
-/* =========================================
-   VIDEO DE BIENVENIDA - MENTES BRILLANTES
-   ========================================= */
-
-#video-intro {
-    position: fixed;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-    z-index: 999999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 1;
-    transition: opacity 0.8s ease;
-}
-
-#video-intro.ocultar {
-    opacity: 0;
-    pointer-events: none;
-}
-
-#intro-video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #000;
-}
-
-#saltar-intro {
-    position: absolute;
-    right: 25px;
-    bottom: 25px;
-    z-index: 1000000;
-
-    border: 1px solid rgba(255,255,255,0.5);
-    border-radius: 30px;
-
-    background: rgba(0,0,0,0.55);
-    color: #fff;
-
-    padding: 11px 20px;
-
-    font-family: 'Montserrat', Arial, sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-
-    cursor: pointer;
-
-    backdrop-filter: blur(6px);
-    transition: all 0.25s ease;
-}
-
-#saltar-intro:hover {
-    background: #ffb300;
-    color: #111;
-    transform: scale(1.05);
-}
-
-2. Agrega el video inmediatamente después de <body>
-
-Actualmente tienes:
-
-</head>
-<body>
-    <!-- Fondo SVG decorativo: ondas negras y destellos dorados -->
-
-Eso aparece exactamente al comienzo de tu interfaz.
-
-Cámbialo por:
-
-</head>
-
-<body>
-
-    <!-- =========================================
-         VIDEO DE BIENVENIDA
-         ========================================= -->
-    <div id="video-intro">
-        <video
-            id="intro-video"
-            autoplay
-            muted
-            playsinline
-            preload="auto"
-        >
-            <source src="VIDEO.mp4" type="video/mp4">
-            Tu navegador no soporta reproducción de video.
-        </video>
-
-        <button id="saltar-intro" type="button">
-            Saltar intro →
-        </button>
-    </div>
-
-    <!-- Fondo SVG decorativo: ondas negras y destellos dorados -->
-
-Aquí hay una sola cosa que tienes que cambiar:
-
-<source src="VIDEO.mp4" type="video/mp4">
-
-por el nombre exacto de tu archivo de video en GitHub.
-
-Por ejemplo, si tu repositorio tiene:
-
-index.html
-BD.html
-Imagen3.png
-Imagen4.png
-Video Mentes Brillantes.mp4
-
-yo preferiría renombrarlo en GitHub a algo sencillo:
-
-intro.mp4
-
-y entonces usar:
-
-<source src="intro.mp4" type="video/mp4">
-
-Si está dentro de una carpeta:
-
-videos/
-    intro.mp4
-
-sería:
-
-<source src="videos/intro.mp4" type="video/mp4">
-
-Las mayúsculas y minúsculas importan en GitHub Pages.
-3. Agrega el JavaScript para cerrar el video
-
-Al final de tu archivo ya tienes tu <script> principal y después cierras body y html.
-
-Actualmente el final es aproximadamente:
-
-    });
-    </script>
-</body>
-</html>
-
-Déjalo así:
-
-    });
-    </script>
-
-
-    <!-- =========================================
-         CONTROL VIDEO DE BIENVENIDA
-         ========================================= -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            const videoIntro = document.getElementById('video-intro');
-            const introVideo = document.getElementById('intro-video');
-            const saltarIntro = document.getElementById('saltar-intro');
-
-            function cerrarIntro() {
-
-                if (!videoIntro) return;
-
-                videoIntro.classList.add('ocultar');
-
-                setTimeout(function () {
-                    videoIntro.style.display = 'none';
-
-                    if (introVideo) {
-                        introVideo.pause();
-                    }
-
-                    document.body.style.overflow = '';
-
-                }, 800);
-            }
-
-            // Bloquear scroll mientras aparece el video
-            document.body.style.overflow = 'hidden';
-
-            // Cuando termina el video
-            if (introVideo) {
-                introVideo.addEventListener('ended', cerrarIntro);
-            }
-
-            // Botón Saltar intro
-            if (saltarIntro) {
-                saltarIntro.addEventListener('click', cerrarIntro);
-            }
-
-        });
-    </script>
-
-</body>
-</html>
-
-¿Qué ocurrirá?
-
-Cuando alguien entre a:
-
-Despertando-Ideas/
-
-el navegador cargará tu página normalmente, pero la capa del video tendrá z-index: 999999, así que estará encima de absolutamente toda tu interfaz.
-
-Visualmente será:
-
-ENTRA AL ENLACE
-      ↓
-┌──────────────────────────┐
-│                          │
-│                          │
-│       VIDEO INTRO        │
-│                          │
-│                          │
-│             Saltar →     │
-└──────────────────────────┘
-      ↓
-  termina video
-      ↓
-   FADE 0.8 s
-      ↓
-┌──────────────────────────┐
-│     MENTES BRILLANTES    │
-│                          │
-│    DESPERTANDO IDEAS     │
-│   ──────────────────     │
-│                          │
-│ Comparte tu idea...      │
-│                          │
-└──────────────────────────┘
-
-Y tu formulario, Firebase, menú, Base de datos, consulta por documento, etc. quedan intactos. No necesitas moverlos. De hecho, tu panel principal empieza actualmente en .main-panel y después tienes todo el formulario hasta el footer.
-Pero falta decidir el tema del audio
-
-El código anterior usa:
-
-autoplay
-muted
-playsinline
-
-Esto es intencional. Permite que el video se reproduzca automáticamente con mucha más fiabilidad.
-
-Si tu video tiene música o voz y quieres que el usuario la escuche, yo cambiaría el diseño: mostraríamos primero una pantalla elegante con el logo de Mentes Brillantes y un botón:
-
-▶ INICIAR EXPERIENCIA
-
-El usuario hace clic → video a pantalla completa con sonido → termina → fade → aparece “Despertando Ideas”.
-
-Eso evita el bloqueo de autoplay con audio de Chrome/Edge/celulares.
-
-Dime el nombre exacto del .mp4 que tienes cargado en GitHub y si quieres que se reproduzca CON sonido o SIN sonido, y te doy el código final ya con el nombre correcto para copiar y pegar.
-
-Pasted text.txt
-Documento
-como quedaria el codigo completo y el video se llama"Mentes Brillantes.mp4"
-
-Sí. Ya tomé tu index.html completo y le integré el video Mentes Brillantes.mp4 sin modificar la lógica de Firebase, formulario, base de datos, menú ni consultas. Tu interfaz original comienza inmediatamente después de <body>, por lo que inserté la intro justo en ese punto.
-
-Te dejé el archivo completo listo para reemplazar tu index.html:
-
-Qué debes hacer
-
-    Descarga el archivo.
-
-    Renómbralo a:
-    index.html
-
-    Súelo a GitHub reemplazando tu index.html actual.
-
-    Asegúrate de que en la misma carpeta estén:
-
-        index.html
-
-        Mentes Brillantes.mp4
-
-        Imagen3.png
-
-        Imagen4.png
-
-        los demás archivos actuales.
-
-    Espera uno o dos minutos a que GitHub Pages actualice y vuelve a abrir tu enlace.
-
-He usado esta ruta dentro del código:
-
-<source src="Mentes%20Brillantes.mp4" type="video/mp4">
-
-El %20 representa el espacio del nombre Mentes Brillantes.mp4, así evitamos problemas con la URL en GitHub Pages.
-Así funcionará
-
-Al entrar al enlace aparecerá primero el video a pantalla completa. Se reproducirá automáticamente silenciado —esto es importante porque Chrome, Edge y los navegadores móviles suelen bloquear el autoplay con sonido—. Habrá un botón “Saltar intro →” y, cuando el video termine, hará un fade suave de 0.8 segundos y mostrará automáticamente tu interfaz de DESPERTANDO IDEAS.
-
-También agregué una protección: si por alguna razón GitHub no encuentra o no puede cargar el MP4, la página no se quedará bloqueada en negro; cerrará la intro y mostrará tu interfaz.
-
-Tu formulario y toda la lógica existente permanecen después de la intro, incluido el formulario que comienza en surveyForm.
-
-Un punto importante: esta versión reproduce el video sin sonido. Si quieres que se escuche el audio del video, puedo hacerte una versión mejor: al entrar aparecerá una pantalla de Mentes Brillantes + botón “▶ Comenzar”, y al pulsarlo se reproducirá Mentes Brillantes.mp4 con audio y después entrará automáticamente a la interfaz.
-
-
-index_con_video.html
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1376,53 +954,14 @@ index_con_video.html
             }
         }
 
-        /* Video de bienvenida */
-        #video-intro {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            z-index: 999999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 1;
-            transition: opacity 0.8s ease;
-        }
-        #video-intro.ocultar {
-            opacity: 0;
-            pointer-events: none;
-        }
-        #intro-video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            background: #000;
-        }
-        #saltar-intro {
-            position: absolute;
-            right: 25px;
-            bottom: 25px;
-            z-index: 1000000;
-            border: 1px solid rgba(255,255,255,0.5);
-            border-radius: 30px;
-            background: rgba(0,0,0,0.55);
-            color: #fff;
-            padding: 11px 20px;
-            font-family: 'Montserrat', Arial, sans-serif;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            backdrop-filter: blur(6px);
-            transition: all 0.25s ease;
-        }
-        #saltar-intro:hover {
-            background: #ffb300;
-            color: #111;
-            transform: scale(1.05);
-        }
-
+        /* VIDEO INTRO - MENTES BRILLANTES */
+        #video-intro { position: fixed; inset: 0; width: 100vw; height: 100vh; background: #000; z-index: 999999; display: flex; align-items: center; justify-content: center; opacity: 1; visibility: visible; transition: opacity .8s ease, visibility .8s ease; }
+        #video-intro.ocultar { opacity: 0; visibility: hidden; pointer-events: none; }
+        #intro-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; z-index: 1; }
+        #saltar-intro, #activar-sonido { position: fixed; bottom: 25px; z-index: 1000002; border-radius: 30px; padding: 12px 22px; font-family: 'Montserrat', Arial, sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; }
+        #saltar-intro { right: 25px; border: 1px solid rgba(255,255,255,.6); background: rgba(0,0,0,.65); color: #fff; }
+        #activar-sonido { left: 50%; transform: translateX(-50%); border: none; background: #ffb300; color: #111; display: none; }
+        #saltar-intro:hover, #activar-sonido:hover { background: #ffd54f; color: #111; }
     </style>
     <!-- SDK Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -1501,12 +1040,14 @@ index_con_video.html
     </script>
 </head>
 <body>
-    <!-- Video de bienvenida -->
+
+    <!-- VIDEO DE BIENVENIDA -->
     <div id="video-intro">
-        <video id="intro-video" autoplay muted playsinline preload="auto">
+        <video id="intro-video" autoplay playsinline preload="auto">
             <source src="Mentes%20Brillantes.mp4" type="video/mp4">
             Tu navegador no soporta reproducción de video.
         </video>
+        <button id="activar-sonido" type="button">🔊 Activar sonido</button>
         <button id="saltar-intro" type="button">Saltar intro →</button>
     </div>
         <!-- Fondo SVG decorativo: ondas negras y destellos dorados -->
@@ -2351,36 +1892,42 @@ index_con_video.html
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const videoIntro = document.getElementById('video-intro');
-            const introVideo = document.getElementById('intro-video');
-            const saltarIntro = document.getElementById('saltar-intro');
-
-            function cerrarIntro() {
-                if (!videoIntro) return;
-                videoIntro.classList.add('ocultar');
-                setTimeout(function () {
-                    videoIntro.style.display = 'none';
-                    if (introVideo) introVideo.pause();
-                    document.body.style.overflow = '';
-                }, 800);
-            }
-
-            document.body.style.overflow = 'hidden';
-
-            if (introVideo) {
-                introVideo.addEventListener('ended', cerrarIntro);
-                introVideo.addEventListener('error', function () {
-                    console.error('No se pudo cargar Mentes Brillantes.mp4');
-                    cerrarIntro();
-                });
-            }
-
-            if (saltarIntro) {
-                saltarIntro.addEventListener('click', cerrarIntro);
-            }
+    document.addEventListener('DOMContentLoaded', function () {
+        const intro = document.getElementById('video-intro');
+        const video = document.getElementById('intro-video');
+        const saltar = document.getElementById('saltar-intro');
+        const activarSonido = document.getElementById('activar-sonido');
+        if (!intro || !video) return;
+        document.documentElement.style.overflow = 'hidden';
+        document.body.style.overflow = 'hidden';
+        function cerrarIntro() {
+            if (intro.dataset.cerrando === 'true') return;
+            intro.dataset.cerrando = 'true';
+            video.pause();
+            intro.classList.add('ocultar');
+            setTimeout(function () {
+                intro.style.display = 'none';
+                document.documentElement.style.overflow = '';
+                document.body.style.overflow = '';
+            }, 800);
+        }
+        if (saltar) saltar.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); cerrarIntro(); });
+        video.addEventListener('ended', cerrarIntro);
+        video.addEventListener('error', cerrarIntro);
+        video.muted = false; video.volume = 1;
+        const intento = video.play();
+        if (intento && typeof intento.catch === 'function') {
+            intento.catch(function () {
+                video.muted = true;
+                video.play().catch(function(){});
+                if (activarSonido) activarSonido.style.display = 'block';
+            });
+        }
+        if (activarSonido) activarSonido.addEventListener('click', function(e){
+            e.preventDefault(); e.stopPropagation(); video.muted = false; video.volume = 1;
+            video.play().catch(function(){}); activarSonido.style.display = 'none';
         });
+    });
     </script>
 </body>
 </html>
-
