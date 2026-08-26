@@ -974,6 +974,9 @@
             body {
                 background: #181818;
                 align-items: stretch;
+                overflow-x: hidden;
+                overflow-y: auto;
+                touch-action: pan-y;
             }
 
             .svg-background {
@@ -2237,6 +2240,12 @@
         if (!intro || !video) return;
         document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
+        function habilitarScroll() {
+            document.documentElement.style.overflowX = 'hidden';
+            document.documentElement.style.overflowY = 'auto';
+            document.body.style.overflowX = 'hidden';
+            document.body.style.overflowY = 'auto';
+        }
         function cerrarIntro() {
             if (intro.dataset.cerrando === 'true') return;
             intro.dataset.cerrando = 'true';
@@ -2244,8 +2253,7 @@
             intro.classList.add('ocultar');
             setTimeout(function () {
                 intro.style.display = 'none';
-                document.documentElement.style.overflow = '';
-                document.body.style.overflow = '';
+                habilitarScroll();
             }, 800);
         }
         if (saltar) saltar.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); cerrarIntro(); });
