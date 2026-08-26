@@ -962,6 +962,10 @@
         #saltar-intro { right: 25px; border: 1px solid rgba(255,255,255,.6); background: rgba(0,0,0,.65); color: #fff; }
         #activar-sonido { left: 50%; transform: translateX(-50%); border: none; background: #ffb300; color: #111; display: none; }
         #saltar-intro:hover, #activar-sonido:hover { background: #ffd54f; color: #111; }
+        html.intro-activa,
+        body.intro-activa {
+            overflow: hidden !important;
+        }
 
         @media (max-width: 600px) {
             :root {
@@ -977,6 +981,17 @@
                 overflow-x: hidden;
                 overflow-y: auto;
                 touch-action: pan-y;
+            }
+
+            html,
+            body {
+                min-height: 100%;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            html.intro-activa,
+            body.intro-activa {
+                overflow: hidden !important;
             }
 
             .svg-background {
@@ -2238,9 +2253,13 @@
         const saltar = document.getElementById('saltar-intro');
         const activarSonido = document.getElementById('activar-sonido');
         if (!intro || !video) return;
-        document.documentElement.style.overflow = 'hidden';
-        document.body.style.overflow = 'hidden';
+        document.documentElement.classList.add('intro-activa');
+        document.body.classList.add('intro-activa');
         function habilitarScroll() {
+            document.documentElement.classList.remove('intro-activa');
+            document.body.classList.remove('intro-activa');
+            document.documentElement.style.removeProperty('overflow');
+            document.body.style.removeProperty('overflow');
             document.documentElement.style.overflowX = 'hidden';
             document.documentElement.style.overflowY = 'auto';
             document.body.style.overflowX = 'hidden';
