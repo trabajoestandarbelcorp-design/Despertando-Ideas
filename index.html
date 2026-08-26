@@ -977,7 +977,7 @@
 
             body {
                 background: #181818;
-                align-items: stretch;
+                display: block;
                 overflow-x: hidden;
                 overflow-y: auto;
                 touch-action: pan-y;
@@ -1001,12 +1001,19 @@
             .main-panel {
                 width: 100%;
                 max-width: none;
-                min-height: 100vh;
+                min-height: 100dvh;
                 margin: 0;
                 padding: 78px 18px 28px;
                 border-radius: 0;
                 box-shadow: none;
                 background: rgba(255, 255, 255, 0.98);
+                overflow: visible;
+            }
+
+            @supports not (height: 100dvh) {
+                .main-panel {
+                    min-height: 100vh;
+                }
             }
 
             .main-panel::before {
