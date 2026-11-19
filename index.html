@@ -702,26 +702,6 @@
             max-width: 100%;
             filter: drop-shadow(0 0 32px #70278588);
         }
-        .logo-video-sound {
-            position: absolute;
-            right: 8px;
-            bottom: 8px;
-            z-index: 1;
-            width: 34px;
-            height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            border-radius: 50%;
-            background: rgba(67, 32, 82, 0.78);
-            color: #FFFFFF;
-            cursor: pointer;
-        }
-        .logo-video-sound:focus-visible {
-            outline: 3px solid #B50E7D;
-            outline-offset: 2px;
-        }
         h1 {
             text-align: center;
             font-size: 2.7em;
@@ -1532,9 +1512,6 @@
                 <source src="Video3.mp4" type="video/mp4">
                 Tu navegador no puede reproducir este video.
             </video>
-            <button id="logo-video-sound" class="logo-video-sound" type="button" aria-label="Activar sonido" aria-pressed="false" title="Activar sonido">
-                <i class="fa-solid fa-volume-xmark" aria-hidden="true"></i>
-            </button>
         </div>
         <h1>MENTES BRILLANTES</h1>
         <div class="divider"></div>
@@ -2314,23 +2291,6 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const logoVideo = document.getElementById('logo-video');
-        const logoVideoSound = document.getElementById('logo-video-sound');
-        if (logoVideo && logoVideoSound) {
-            const icon = logoVideoSound.querySelector('i');
-            logoVideoSound.addEventListener('click', function () {
-                logoVideo.muted = !logoVideo.muted;
-                const soundOn = !logoVideo.muted;
-                logoVideoSound.setAttribute('aria-label', soundOn ? 'Silenciar video' : 'Activar sonido');
-                logoVideoSound.setAttribute('aria-pressed', String(soundOn));
-                logoVideoSound.title = soundOn ? 'Silenciar video' : 'Activar sonido';
-                if (icon) {
-                    icon.classList.toggle('fa-volume-high', soundOn);
-                    icon.classList.toggle('fa-volume-xmark', !soundOn);
-                }
-            });
-        }
-
         const intro = document.getElementById('video-intro');
         const video = document.getElementById('intro-video');
         const saltar = document.getElementById('saltar-intro');
